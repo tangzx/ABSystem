@@ -80,16 +80,18 @@ namespace Uzen.AB
         void LoadDepInfo()
         {
             depInfoReader = new AssetBundleDataReader();
-            string infoPath = Path.Combine(pathResolver.BundleCacheDir, pathResolver.DependFileName);
-            if (File.Exists(infoPath))
+            string depFile = string.Format("{0}/{1}", pathResolver.BundleCacheDir, pathResolver.DependFileName);
+            string srcFile = pathResolver.GetBundleSourceFile(pathResolver.DependFileName);
+
+            if (File.Exists(depFile))
             {
-                FileStream fs = new FileStream(infoPath, FileMode.Open);
+                FileStream fs = new FileStream(depFile, FileMode.Open);
                 depInfoReader.Read(fs);
                 fs.Close();
             }
             else
             {
-                Debug.LogError(string.Format("{0} not exist!", infoPath));
+                Debug.LogError(string.Format("{0} not exist!", depFile));
             }
         }
 
