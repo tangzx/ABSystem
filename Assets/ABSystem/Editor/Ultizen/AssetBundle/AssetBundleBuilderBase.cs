@@ -30,7 +30,7 @@ public abstract class AssetBundleBuilderBase
     void InitDirs()
     {
         new DirectoryInfo(pathResolver.BundleSaveDir).Create();
-        new FileInfo(pathResolver.HashCacheSavePath).Directory.Create();
+        new FileInfo(pathResolver.HashCacheSaveFile).Directory.Create();
     }
 
     public void Begin()

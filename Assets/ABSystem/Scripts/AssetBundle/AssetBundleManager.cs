@@ -65,13 +65,15 @@ namespace Uzen.AB
         /// </summary>
         public LoadProgressHandler onProgress;
 
+        public AssetBundlePathResolver pathResolver;
+
         private AssetBundleDataReader depInfoReader;
 
         public AssetBundleManager()
         {
             Instance = this;
-
-            assetBundlesDir = FilePath.GetWritablePath("AssetBundles", true, false);
+            pathResolver = new AssetBundlePathResolver();
+            assetBundlesDir = pathResolver.BundleCacheDir;
         }
 
         protected void Awake()
@@ -83,7 +85,7 @@ namespace Uzen.AB
         void LoadDepInfo()
         {
             depInfoReader = new AssetBundleDataReader();
-            string infoPath = FilePath.GetWritablePath("AssetBundles/dep.all");
+            string infoPath = Path.Combine(pathResolver.BundleCacheDir, pathResolver.DependFileName);
             if (File.Exists(infoPath))
             {
                 FileStream fs = new FileStream(infoPath, FileMode.Open);

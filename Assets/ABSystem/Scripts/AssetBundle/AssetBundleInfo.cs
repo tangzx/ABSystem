@@ -88,7 +88,7 @@ public class AssetBundleInfo
             if (_mainObject == null && _isReady)
             {
 #if !AB_MODE && UNITY_EDITOR
-                string newPath = path.Substring(path.IndexOf("Asset"));
+                string newPath = AssetBundlePathResolver.instance.GetEditorModePath(path);
                 _mainObject = UnityEditor.AssetDatabase.LoadMainAssetAtPath(newPath);
 #else
                 _mainObject = bundle.mainAsset;

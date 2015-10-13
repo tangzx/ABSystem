@@ -39,7 +39,7 @@ namespace Uzen.AB
 
         public static void LoadCache()
         {
-            string cacheTxtFilePath = pathResolver.HashCacheSavePath;
+            string cacheTxtFilePath = pathResolver.HashCacheSaveFile;
             if (File.Exists(cacheTxtFilePath))
             {
                 string value = File.ReadAllText(cacheTxtFilePath);
@@ -66,7 +66,7 @@ namespace Uzen.AB
                 sb.AppendLine(target.assetPath);
                 sb.AppendLine(target.GetHash());
             }
-            File.WriteAllText(pathResolver.HashCacheSavePath, sb.ToString());
+            File.WriteAllText(pathResolver.HashCacheSaveFile, sb.ToString());
         }
 
         public static List<AssetTarget> GetAll()
