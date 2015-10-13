@@ -27,7 +27,16 @@ public class AssetBundlePathResolver
     /// <returns></returns>
     public virtual string GetEditorModePath(string abName)
     {
-        return "Assets/Prefabs/Test.prefab";
+        //将 Assets.AA.BB.prefab 转为 Assets/AA/BB.prefab
+        string p = abName.Substring(0, abName.Length - 3);//去除最后的 .ab
+        p = p.Replace(".", "/");
+        int last = p.LastIndexOf("/");
+        
+        if (last == -1)
+            return p;
+
+        string path = string.Format("{0}.{1}", p.Substring(0, last), p.Substring(last + 1));
+        return path;
     }
 #endif
     /// <summary>
