@@ -88,16 +88,8 @@ namespace Uzen.AB
                 this.type = AssetType.Builtin;
             }
 
-            string bn = assetPath.Replace(AssetBundleUtils.AssetBundlesPath, "")
-                .Replace(AssetBundleUtils.AssetPath, "")
-                .Replace('\\', '.')
-                .Replace('/', '.')
-                .Replace(" ", "_");
-            bundleName = bn + ".ab";
-            //bundleName = bn.ToLower();
-            bundleSavePath = string.Format("{0}/StreamingAssets/AssetBundles/{1}",
-                        Application.dataPath,
-                        bundleName);
+            bundleName = AssetBundleUtils.ConvertToABName(assetPath);
+            bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSaveDir, bundleName);
 
             _isFileChanged = true;
         }

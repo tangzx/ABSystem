@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -17,8 +18,24 @@ public abstract class AssetBundleBuilderBase
     /// </summary>
     protected List<AssetTarget> newBuildTargets = new List<AssetTarget>();
 
+    protected AssetBundlePathResolver pathResolver;
+
+    public AssetBundleBuilderBase(AssetBundlePathResolver pathResolver)
+    {
+        this.pathResolver = pathResolver;
+        this.InitDirs();
+        AssetBundleUtils.pathResolver = pathResolver;
+    }
+
+    void InitDirs()
+    {
+        new DirectoryInfo(pathResolver.BundleSaveDir).Create();
+        new FileInfo(pathResolver.HashCacheSavePath).Directory.Create();
+    }
+
     public void Begin()
     {
+        EditorUtility.DisplayProgressBar("Loading", "Loading...", 0.1f);
         AssetBundleUtils.Init();
     }
 
@@ -40,40 +57,48 @@ public abstract class AssetBundleBuilderBase
     public void End()
     {
         AssetBundleUtils.ClearCache();
+        EditorUtility.ClearProgressBar();
     }
 
     public void Export()
     {
-        var all = AssetBundleUtils.GetAll();
-        foreach (AssetTarget target in all)
+        try
         {
-            target.Analyze();
-        }
-        all = AssetBundleUtils.GetAll();
-        foreach (AssetTarget target in all)
-        {
-            target.Merge();
-        }
-        all = AssetBundleUtils.GetAll();
-        foreach (AssetTarget target in all)
-        {
-            target.BeforeExport();
-        }
+            var all = AssetBundleUtils.GetAll();
+            foreach (AssetTarget target in all)
+            {
+                target.Analyze();
+            }
+            all = AssetBundleUtils.GetAll();
+            foreach (AssetTarget target in all)
+            {
+                target.Merge();
+            }
+            all = AssetBundleUtils.GetAll();
+            foreach (AssetTarget target in all)
+            {
+                target.BeforeExport();
+            }
 
-        //Build Export Tree
-        all = AssetBundleUtils.GetAll();
-        List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
-        foreach (AssetTarget target in all)
-        {
-            BuildExportTree(target, tree, 0);
+            //Build Export Tree
+            all = AssetBundleUtils.GetAll();
+            List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
+            foreach (AssetTarget target in all)
+            {
+                BuildExportTree(target, tree, 0);
+            }
+
+            //Export
+            this.Export(tree, 0);
+            this.SaveDepAll(all);
+            this.RemoveUnused(all);
+
+            AssetBundleUtils.SaveCache();
         }
-
-        //Export
-        this.Export(tree, 0);
-        this.SaveDepAll(all);
-        this.RemoveUnused(all);
-
-        AssetBundleUtils.SaveCache();
+        catch(Exception e)
+        {
+            Debug.LogException(e);
+        }
     }
 
     void BuildExportTree(AssetTarget parent, List<List<AssetTarget>> tree, int currentLevel)
@@ -139,8 +164,8 @@ public abstract class AssetBundleBuilderBase
 
     void SaveDepAll(List<AssetTarget> all)
     {
-        string path = string.Format("{0}/StreamingAssets/AssetBundles/dep.all", Application.dataPath);
-        
+        string path = Path.Combine(pathResolver.BundleSaveDir, pathResolver.DependFileName);
+
         if (File.Exists(path))
             File.Delete(path);
         FileStream fs = new FileStream(path, FileMode.CreateNew);
@@ -169,8 +194,7 @@ public abstract class AssetBundleBuilderBase
                 usedSet.Add(target.bundleName);
         }
 
-        string bundleSavePath = string.Format("{0}/StreamingAssets/AssetBundles", Application.dataPath);
-        DirectoryInfo di = new DirectoryInfo(bundleSavePath);
+        DirectoryInfo di = new DirectoryInfo(pathResolver.BundleSaveDir);
         FileInfo[] abFiles = di.GetFiles("*.ab");
         for (int i = 0; i < abFiles.Length; i++)
         {

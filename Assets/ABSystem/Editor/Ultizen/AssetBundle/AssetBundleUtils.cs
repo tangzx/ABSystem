@@ -9,10 +9,9 @@ namespace Uzen.AB
 {
     class AssetBundleUtils
     {
+        public static AssetBundlePathResolver pathResolver;
         public static DirectoryInfo AssetDir = new DirectoryInfo(Application.dataPath);
         public static string AssetPath = AssetDir.FullName;
-        public static DirectoryInfo AssetBundlesDir = new DirectoryInfo(Application.dataPath + "/AssetBundles");
-        public static string AssetBundlesPath = AssetBundlesDir.FullName;
         public static DirectoryInfo ProjectDir = AssetDir.Parent;
         public static string ProjectPath = ProjectDir.FullName;
 
@@ -40,7 +39,7 @@ namespace Uzen.AB
 
         public static void LoadCache()
         {
-            string cacheTxtFilePath = Path.Combine(AssetBundlesPath, "cache.txt");
+            string cacheTxtFilePath = pathResolver.HashCacheSavePath;
             if (File.Exists(cacheTxtFilePath))
             {
                 string value = File.ReadAllText(cacheTxtFilePath);
@@ -67,28 +66,12 @@ namespace Uzen.AB
                 sb.AppendLine(target.assetPath);
                 sb.AppendLine(target.GetHash());
             }
-            File.WriteAllText(Path.Combine(AssetBundlesPath, "cache.txt"), sb.ToString());
-        }
-
-        public static string GetProjectPath(FileInfo fi)
-        {
-            string fullName = fi.FullName;
-            int index = fullName.IndexOf("Assets");
-            return fullName.Substring(index);
+            File.WriteAllText(pathResolver.HashCacheSavePath, sb.ToString());
         }
 
         public static List<AssetTarget> GetAll()
         {
             return new List<AssetTarget>(_object2target.Values);
-        }
-
-        public static Object LoadAssetObject(FileInfo file)
-        {
-            string fullName = file.FullName;
-            int index = fullName.IndexOf("Assets");
-            string relave = fullName.Substring(index);
-            Object o = AssetDatabase.LoadMainAssetAtPath(relave);
-            return o;
         }
 
         public static AssetTarget Load(Object o)
@@ -177,6 +160,16 @@ namespace Uzen.AB
         public static AssetTarget Load(FileInfo file)
         {
             return Load(file, null);
+        }
+
+        public static string ConvertToABName(string assetPath)
+        {
+            string bn = assetPath
+                .Replace(AssetBundleUtils.AssetPath, "")
+                .Replace('\\', '.')
+                .Replace('/', '.')
+                .Replace(" ", "_");
+            return bn + ".ab";
         }
 
         public static string GetFileHash(string path, bool force = false)

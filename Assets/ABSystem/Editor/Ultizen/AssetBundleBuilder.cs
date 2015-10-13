@@ -3,6 +3,11 @@ using UnityEditor;
 
 public class AssetBundleBuilder : AssetBundleBuilderBase
 {
+    public AssetBundleBuilder() : base(new AssetBundlePathResolver())
+    {
+
+    }
+
     [MenuItem("Tang/Build AssetBundles")]
     public static void BuildAssetBundles()
     {
