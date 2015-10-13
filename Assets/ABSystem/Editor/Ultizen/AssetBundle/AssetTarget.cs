@@ -6,16 +6,13 @@ using UnityEngine;
 
 namespace Uzen.AB
 {
-    enum AssetType
+    public enum AssetType
     {
         Asset,
-        UI,
-        BattleScene,
-        Model,
         Builtin
     }
 
-    enum ExportType
+    public enum ExportType
     {
         Asset = 0,
         /// <summary>
@@ -28,7 +25,7 @@ namespace Uzen.AB
         Standalone = 1 << 2
     }
 
-    class AssetTarget : System.IComparable<AssetTarget>
+    public class AssetTarget : System.IComparable<AssetTarget>
     {
         const int MinTexturePixels = 128 * 128;
         const float MinAudioClipLength = 2f;
@@ -451,7 +448,9 @@ namespace Uzen.AB
             HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
             this.GetDependencies(deps);
 
-            sw.WriteLine(string.Format("{0}.info", bundleName));
+            sw.WriteLine(bundleName);
+            //hash
+            sw.WriteLine(GetHash());
             //写入依赖信息
             sw.WriteLine(string.Format("{0}", deps.Count));
             //File Name

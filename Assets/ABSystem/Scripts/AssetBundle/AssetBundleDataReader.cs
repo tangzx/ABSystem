@@ -6,6 +6,7 @@ public class AssetBundleData
 {
     public string shortName;
     public string fullName;
+    public string hash;
     public string[] dependencies;
     public bool isAnalyzed;
     public AssetBundleData[] dependList;
@@ -27,8 +28,7 @@ class AssetBundleDataReader
                 break;
             
             //去除 .info
-            name = name.Substring(0, name.Length - 5);
-
+            string hash = sr.ReadLine();
             int depsCount = Convert.ToInt32(sr.ReadLine());
             string[] deps = new string[depsCount];
             string shortFileName = sr.ReadLine();
@@ -40,6 +40,7 @@ class AssetBundleDataReader
             }
 
             AssetBundleData info = new AssetBundleData();
+            info.hash = hash;
             info.fullName = name;
             info.shortName = shortFileName;
             info.dependencies = deps;
