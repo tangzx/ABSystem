@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using UnityEngine;
+
+/// <summary>
 /// AB 打包及运行时路径解决器
 /// </summary>
 public class AssetBundlePathResolver
@@ -10,11 +12,16 @@ public class AssetBundlePathResolver
         instance = this;
     }
 
+    /// <summary>
+    /// AB 保存的路径相对于 Assets/StreamingAssets 的名字
+    /// </summary>
+    public virtual string BundleSaveDirName { get { return "AssetBundles"; } }
+
 #if UNITY_EDITOR
     /// <summary>
     /// AB 保存的路径
     /// </summary>
-    public virtual string BundleSaveDir { get { return "Assets/StreamingAssets/AssetBundles/"; } }
+    public string BundleSavePath { get { return "Assets/StreamingAssets/" + BundleSaveDirName; } }
     /// <summary>
     /// AB打包的原文件HashCode要保存到的路径，下次可供增量打包
     /// </summary>
@@ -39,6 +46,29 @@ public class AssetBundlePathResolver
         return path;
     }
 #endif
+
+    /// <summary>
+    /// 获取 AB 源文件路径（打包进安装包的）
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="forWWW"></param>
+    /// <returns></returns>
+    public virtual string GetBundleSourceFile(string path, bool forWWW = true)
+    {
+        string filePath = null;
+#if UNITY_EDITOR
+        if (forWWW)
+            filePath = string.Format("file://{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+        else
+            filePath = string.Format("{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+#elif UNITY_ANDROID
+        filePath = string.Format("jar:file://{0}!/assets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+#else
+        filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+#endif
+        return filePath;
+    }
+
     /// <summary>
     /// AB 依赖信息文件名
     /// </summary>
@@ -46,5 +76,5 @@ public class AssetBundlePathResolver
     /// <summary>
     /// 运行时AB缓存的路径
     /// </summary>
-    public virtual string BundleCacheDir { get { return BundleSaveDir; } }
+    public virtual string BundleCacheDir { get { return BundleSavePath; } }
 }

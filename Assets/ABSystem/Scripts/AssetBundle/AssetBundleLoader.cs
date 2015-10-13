@@ -100,8 +100,9 @@ namespace Uzen.AB
         /// </summary>
         public void LoadBundle()
         {
-            _assetBundleFile = string.Format("{0}/{1}", bundleManager.assetBundlesDir, bundleName);
-            _assetBundleURL = FilePath.GetStreamAssetsFile(string.Format("AssetBundles/{0}", bundleName));
+            _assetBundleFile = string.Format("{0}/{1}", bundleManager.pathResolver.BundleCacheDir, bundleName);
+            _assetBundleURL = bundleManager.pathResolver.GetBundleSourceFile(bundleName);
+
             if (File.Exists(_assetBundleFile))
                 bundleManager.StartCoroutine(LoadFromFile());
             else

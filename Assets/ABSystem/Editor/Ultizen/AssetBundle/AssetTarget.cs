@@ -89,7 +89,7 @@ namespace Uzen.AB
             }
 
             bundleName = AssetBundleUtils.ConvertToABName(assetPath);
-            bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSaveDir, bundleName);
+            bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
 
             _isFileChanged = true;
         }

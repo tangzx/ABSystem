@@ -57,10 +57,6 @@ namespace Uzen.AB
 
         private AssetBundleLoadProgress _progress = new AssetBundleLoadProgress();
         /// <summary>
-        /// 可写目录中bundles存储目录
-        /// </summary>
-        public string assetBundlesDir;
-        /// <summary>
         /// 进度
         /// </summary>
         public LoadProgressHandler onProgress;
@@ -73,7 +69,6 @@ namespace Uzen.AB
         {
             Instance = this;
             pathResolver = new AssetBundlePathResolver();
-            assetBundlesDir = pathResolver.BundleCacheDir;
         }
 
         protected void Awake()

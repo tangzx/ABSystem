@@ -29,7 +29,7 @@ public abstract class AssetBundleBuilderBase
 
     void InitDirs()
     {
-        new DirectoryInfo(pathResolver.BundleSaveDir).Create();
+        new DirectoryInfo(pathResolver.BundleSavePath).Create();
         new FileInfo(pathResolver.HashCacheSaveFile).Directory.Create();
     }
 
@@ -164,7 +164,7 @@ public abstract class AssetBundleBuilderBase
 
     void SaveDepAll(List<AssetTarget> all)
     {
-        string path = Path.Combine(pathResolver.BundleSaveDir, pathResolver.DependFileName);
+        string path = Path.Combine(pathResolver.BundleSavePath, pathResolver.DependFileName);
 
         if (File.Exists(path))
             File.Delete(path);
@@ -194,7 +194,7 @@ public abstract class AssetBundleBuilderBase
                 usedSet.Add(target.bundleName);
         }
 
-        DirectoryInfo di = new DirectoryInfo(pathResolver.BundleSaveDir);
+        DirectoryInfo di = new DirectoryInfo(pathResolver.BundleSavePath);
         FileInfo[] abFiles = di.GetFiles("*.ab");
         for (int i = 0; i < abFiles.Length; i++)
         {
