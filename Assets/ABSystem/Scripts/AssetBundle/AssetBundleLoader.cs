@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Uzen.AB
 {
     /// <summary>
-    /// 这个不释放
+    /// Loader 父类
     /// </summary>
-    public class AssetBundleLoader
+    public abstract class AssetBundleLoader
     {
         internal AssetBundleManager.LoadAssetCompleteHandler onComplete;
 
@@ -19,16 +19,67 @@ namespace Uzen.AB
         public LoadState state = LoadState.State_None;
         public AssetBundleLoader[] depLoaders;
         
-        private int _currentLoadingDepCount;
-        private AssetBundle _bundle;
-        private bool _hasError;
-        private string _assetBundleFile;
-        private string _assetBundleURL;
+        public virtual void Load()
+        {
+
+        }
+
+        /// <summary>
+        /// 其它都准备好了，加载AssetBundle
+        /// 注意：这个方法只能被 AssetBundleManager 调用
+        /// 由 Manager 统一分配加载时机，防止加载过卡
+        /// </summary>
+        public virtual void LoadBundle()
+        {
+
+        }
+
+        public virtual bool isComplete
+        {
+            get
+            {
+                return state == LoadState.State_Error || state == LoadState.State_Complete;
+            }
+        }
+
+        protected virtual void Complete()
+        {
+            if (onComplete != null)
+            {
+                var handler = onComplete;
+                onComplete = null;
+                handler(bundleInfo);
+            }
+            bundleManager.LoadComplete(this);
+        }
+
+        protected virtual void Error()
+        {
+            if (onComplete != null)
+            {
+                var handler = onComplete;
+                onComplete = null;
+                handler(bundleInfo);
+            }
+            bundleManager.LoadError(this);
+        }
+    }
+
+    /// <summary>
+    /// 在手机运行时加载
+    /// </summary>
+    public class MobileAssetBundleLoader : AssetBundleLoader
+    {
+        protected int _currentLoadingDepCount;
+        protected AssetBundle _bundle;
+        protected bool _hasError;
+        protected string _assetBundleCachedFile;
+        protected string _assetBundleSourceFile;
 
         /// <summary>
         /// 开始加载
         /// </summary>
-        public void Load()
+        override public void Load()
         {
             if (_hasError)
                 state = LoadState.State_Error;
@@ -36,19 +87,8 @@ namespace Uzen.AB
             if (state == LoadState.State_None)
             {
                 state = LoadState.State_Loading;
-#if !AB_MODE && UNITY_EDITOR
-                if (bundleInfo == null)
-                {
-                    this.state = LoadState.State_Complete;
-                    this.bundleInfo = bundleManager.CreateBundleInfo(this, null);
-                    this.bundleInfo.isReady = true;
-                    this.bundleInfo.onUnloaded = OnBundleUnload;
-                }
 
-                bundleManager.StartCoroutine(this.LoadResource());
-#else
                 this.LoadDepends();
-#endif
             }
             else if (state == LoadState.State_Error)
             {
@@ -59,14 +99,6 @@ namespace Uzen.AB
                 this.Complete();
             }
         }
-
-#if !AB_MODE && UNITY_EDITOR
-        IEnumerator LoadResource()
-        {
-            yield return new WaitForSeconds(0.1f);
-            this.Complete();
-        }
-#endif
 
         void LoadDepends()
         {
@@ -98,44 +130,42 @@ namespace Uzen.AB
         /// 注意：这个方法只能被 AssetBundleManager 调用
         /// 由 Manager 统一分配加载时机，防止加载过卡
         /// </summary>
-        public void LoadBundle()
+        override public void LoadBundle()
         {
-            _assetBundleFile = string.Format("{0}/{1}", bundleManager.pathResolver.BundleCacheDir, bundleName);
-            _assetBundleURL = bundleManager.pathResolver.GetBundleSourceFile(bundleName);
+            _assetBundleCachedFile = string.Format("{0}/{1}", bundleManager.pathResolver.BundleCacheDir, bundleName);
+            _assetBundleSourceFile = bundleManager.pathResolver.GetBundleSourceFile(bundleName);
 
-            if (File.Exists(_assetBundleFile))
+            if (File.Exists(_assetBundleCachedFile))
                 bundleManager.StartCoroutine(LoadFromFile());
             else
                 bundleManager.StartCoroutine(LoadFromBuiltin());
         }
 
-        IEnumerator LoadFromFile()
+        protected virtual IEnumerator LoadFromFile()
         {
             if (state != LoadState.State_Error)
             {
-                _bundle = AssetBundle.CreateFromFile(_assetBundleFile);
+                _bundle = AssetBundle.CreateFromFile(_assetBundleCachedFile);
                 yield return null;
-
-                //byte[] bytes = File.ReadAllBytes(_assetBundleFile);
-                //AssetBundleCreateRequest req = AssetBundle.CreateFromMemory(bytes);
-                //yield return req;
-                //_bundle = req.assetBundle;
 
                 this.Complete();
             }
         }
 
-        IEnumerator LoadFromBuiltin()
+        protected virtual IEnumerator LoadFromBuiltin()
         {
             if (state != LoadState.State_Error)
             {
                 //加载主体
-                WWW www = new WWW(_assetBundleURL);
+                WWW www = new WWW(_assetBundleSourceFile);
                 yield return www;
 
-                File.WriteAllBytes(_assetBundleFile, www.bytes);
+                if (www.error == null)
+                {
+                    File.WriteAllBytes(_assetBundleCachedFile, www.bytes);
 
-                _bundle = www.assetBundle;
+                    _bundle = www.assetBundle;
+                }
 
                 www.Dispose();
                 www = null;
@@ -158,13 +188,13 @@ namespace Uzen.AB
             }
         }
 
-        void Complete()
+        override protected void Complete()
         {
             if (bundleInfo == null)
             {
                 this.state = LoadState.State_Complete;
 
-                this.bundleInfo = bundleManager.CreateBundleInfo(this, _bundle);
+                this.bundleInfo = bundleManager.CreateBundleInfo(this, null, _bundle);
                 this.bundleInfo.isReady = true;
                 this.bundleInfo.onUnloaded = OnBundleUnload;
                 foreach (AssetBundleLoader depLoader in depLoaders)
@@ -174,13 +204,7 @@ namespace Uzen.AB
 
                 _bundle = null;
             }
-            if (onComplete != null)
-            {
-                var handler = onComplete;
-                onComplete = null;
-                handler(bundleInfo);
-            }
-            bundleManager.LoadComplete(this);
+            base.Complete();
         }
 
         private void OnBundleUnload(AssetBundleInfo abi)
@@ -189,27 +213,12 @@ namespace Uzen.AB
             this.state = LoadState.State_None;
         }
 
-        public void Error()
+        override protected void Error()
         {
             _hasError = true;
             this.state = LoadState.State_Error;
             this.bundleInfo = null;
-
-            if (onComplete != null)
-            {
-                var handler = onComplete;
-                onComplete = null;
-                handler(bundleInfo);
-            }
-            bundleManager.LoadError(this);
-        }
-
-        public bool isComplete
-        {
-            get
-            {
-                return state == LoadState.State_Error || state == LoadState.State_Complete;
-            }
+            base.Error();
         }
     }
 }

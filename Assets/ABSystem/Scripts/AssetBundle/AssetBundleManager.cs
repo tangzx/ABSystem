@@ -142,15 +142,27 @@ namespace Uzen.AB
             }
             else
             {
-                loader = new AssetBundleLoader();
+                AssetBundleData data = depInfoReader.GetAssetBundleInfo(path);
+                loader = this.CreateLoader(data);
                 loader.bundleManager = this;
-                loader.bundleData = depInfoReader.GetAssetBundleInfo(path);
+                loader.bundleData = data;
                 loader.path = loader.bundleData.fullName;
                 loader.bundleName = loader.bundleData.fullName;
                 _loaderCache[path] = loader;
             }
 
             return loader;
+        }
+
+        protected virtual AssetBundleLoader CreateLoader(AssetBundleData data)
+        {
+#if UNITY_EDITOR
+            return new EditorModeAssetBundleLoader();
+#elif UNITY_IOS
+            return new IOSAssetBundleLoader();
+#else
+            return new MobileAssetBundleLoader();
+#endif
         }
 
         void StartLoad()
@@ -285,9 +297,10 @@ namespace Uzen.AB
             }
         }
 
-        internal AssetBundleInfo CreateBundleInfo(AssetBundleLoader loader, AssetBundle assetBundle)
+        internal AssetBundleInfo CreateBundleInfo(AssetBundleLoader loader, AssetBundleInfo abi = null, AssetBundle assetBundle = null)
         {
-            AssetBundleInfo abi = new AssetBundleInfo();
+            if (abi == null)
+                abi = new AssetBundleInfo();
             abi.bundleName = loader.bundleName;
             abi.path = loader.path;
             abi.bundle = assetBundle;

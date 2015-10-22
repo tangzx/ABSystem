@@ -52,12 +52,10 @@ public class AssetBundleInfo
         return _isReady && refCount < 0;
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         Debug.Log("Unload : " + path);
-#if !AB_MODE && UNITY_EDITOR
 
-#else
         if (bundle != null)
             bundle.Unload(false);
 
@@ -69,7 +67,7 @@ public class AssetBundleInfo
             dep.Release();
         }
         deps.Clear();
-#endif
+
         if (onUnloaded != null)
             onUnloaded(this);
     }
@@ -81,18 +79,13 @@ public class AssetBundleInfo
         set { _isReady = value; }
     }
 
-    public Object mainObject
+    public virtual Object mainObject
     {
         get
         {
             if (_mainObject == null && _isReady)
             {
-#if !AB_MODE && UNITY_EDITOR
-                string newPath = AssetBundlePathResolver.instance.GetEditorModePath(path);
-                _mainObject = UnityEditor.AssetDatabase.LoadMainAssetAtPath(newPath);
-#else
                 _mainObject = bundle.mainAsset;
-#endif
             }
             return _mainObject;
         }
