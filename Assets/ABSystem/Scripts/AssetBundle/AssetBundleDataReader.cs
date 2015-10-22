@@ -31,7 +31,8 @@ class AssetBundleDataReader
             string hash = sr.ReadLine();
             int depsCount = Convert.ToInt32(sr.ReadLine());
             string[] deps = new string[depsCount];
-            string shortFileName = sr.ReadLine();
+            string shortFileName = sr.ReadLine().ToLower();
+
             if (!shortName2FullName.ContainsKey(shortFileName))
                 shortName2FullName.Add(shortFileName, name);
             for (int i = 0; i < depsCount; i++)
@@ -44,7 +45,8 @@ class AssetBundleDataReader
             info.fullName = name;
             info.shortName = shortFileName;
             info.dependencies = deps;
-            infoMap[name] = info;
+
+            infoMap[name.ToLower()] = info;
         }
         sr.Close();
         fs.Close();
@@ -94,8 +96,13 @@ class AssetBundleDataReader
 
     public AssetBundleData GetAssetBundleInfo(string fullName)
     {
-        if (fullName != null && infoMap.ContainsKey(fullName))
-            return infoMap[fullName];
+        if (fullName != null)
+        {
+            fullName = fullName.ToLower();
+
+            if (infoMap.ContainsKey(fullName))
+                return infoMap[fullName];
+        }
         return null;
     }
 }

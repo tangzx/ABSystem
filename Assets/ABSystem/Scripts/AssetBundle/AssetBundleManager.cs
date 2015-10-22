@@ -143,10 +143,10 @@ namespace Uzen.AB
             else
             {
                 loader = new AssetBundleLoader();
-                loader.path = path;
                 loader.bundleManager = this;
-                loader.bundleName = path;
                 loader.bundleData = depInfoReader.GetAssetBundleInfo(path);
+                loader.path = loader.bundleData.fullName;
+                loader.bundleName = loader.bundleData.fullName;
                 _loaderCache[path] = loader;
             }
 
