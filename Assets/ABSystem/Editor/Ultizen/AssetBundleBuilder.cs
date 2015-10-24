@@ -14,7 +14,7 @@ public class AssetBundleBuilder : AssetBundleBuilderBase
         AssetBundleBuilder builder = new AssetBundleBuilder();
         builder.Begin();
 
-        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab" });
+        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab","*.png" });
 
         builder.Export();
         builder.End();

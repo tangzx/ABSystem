@@ -156,7 +156,9 @@ namespace Uzen.AB
 
         protected virtual AssetBundleLoader CreateLoader(AssetBundleData data)
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && AB_MODE
+            return new MobileAssetBundleLoader();
+#elif UNITY_EDITOR
             return new EditorModeAssetBundleLoader();
 #elif UNITY_IOS
             return new IOSAssetBundleLoader();
@@ -365,6 +367,7 @@ namespace Uzen.AB
                 if (unloadCount > 0)
                 {
                     Debug.Log("===>> Unload Count: " + unloadCount);
+                    Resources.UnloadUnusedAssets();
                 }
 #endif
             }
@@ -377,18 +380,6 @@ namespace Uzen.AB
             {
                 this.RemoveBundleInfo(abi);
             }
-        }
-
-        /// <summary>
-        /// 删除Bundle跟踪器
-        /// 警告：删除跟踪器可能会使原来的AssetBundle被清除
-        /// </summary>
-        /// <param name="go"></param>
-        public void RemoveBundleTracker(GameObject go)
-        {
-            AssetBundleTrack abt = go.GetComponent<AssetBundleTrack>();
-            if (abt != null)
-                Destroy(abt);
         }
 
 #if UNITY_EDITOR
