@@ -90,7 +90,7 @@ public class AssetBundleInfo
     /// </summary>
     /// <param name="user">增加引用的对象</param>
     /// <returns></returns>
-    public virtual GameObject Instantiate(object user)
+    public virtual GameObject Instantiate()
     {
         if (mainObject != null)
         {
