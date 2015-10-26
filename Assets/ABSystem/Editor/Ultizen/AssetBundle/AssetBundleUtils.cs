@@ -1,12 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Uzen.AB
 {
+    class AssetCacheInfo
+    {
+        public string fileHash;
+        /// <summary>
+        /// 所依赖的那些文件
+        /// </summary>
+        public string[] depNames;
+    }
+
     class AssetBundleUtils
     {
         public static AssetBundlePathResolver pathResolver;
@@ -18,14 +29,14 @@ namespace Uzen.AB
         static Dictionary<int, AssetTarget> _object2target;
         static Dictionary<string, AssetTarget> _assetPath2target;
         static Dictionary<string, string> _fileHashCache;
-        static Dictionary<string, string> _fileHashOld;
+        static Dictionary<string, AssetCacheInfo> _fileHashOld;
 
         public static void Init()
         {
             _object2target = new Dictionary<int, AssetTarget>();
             _assetPath2target = new Dictionary<string, AssetTarget>();
             _fileHashCache = new Dictionary<string, string>();
-            _fileHashOld = new Dictionary<string, string>();
+            _fileHashOld = new Dictionary<string, AssetCacheInfo>();
             LoadCache();
         }
 
@@ -50,23 +61,32 @@ namespace Uzen.AB
                     if (path == null)
                         break;
 
-                    string hash = sr.ReadLine();
+                    AssetCacheInfo cache = new AssetCacheInfo();
+                    cache.fileHash = sr.ReadLine();
 
-                    _fileHashOld[path] = hash;
+                    int depsCount = Convert.ToInt32(sr.ReadLine());
+                    cache.depNames = new string[depsCount];
+                    for (int i = 0; i < depsCount; i++)
+                    {
+                        cache.depNames[i] = sr.ReadLine();
+                    }
+
+                    _fileHashOld[path] = cache;
                 }
             }
         }
 
         public static void SaveCache()
         {
-            StringBuilder sb = new StringBuilder();
+            StreamWriter sw = new StreamWriter(pathResolver.HashCacheSaveFile);
 
             foreach (AssetTarget target in _object2target.Values)
             {
-                sb.AppendLine(target.assetPath);
-                sb.AppendLine(target.GetHash());
+                target.WriteCache(sw);
             }
-            File.WriteAllText(pathResolver.HashCacheSaveFile, sb.ToString());
+
+            sw.Flush();
+            sw.Close();
         }
 
         public static List<AssetTarget> GetAll()
@@ -199,7 +219,7 @@ namespace Uzen.AB
             return _hexStr;
         }
 
-        public static string GetOldHash(string path)
+        public static AssetCacheInfo GetCacheInfo(string path)
         {
             if (_fileHashOld.ContainsKey(path))
                 return _fileHashOld[path];

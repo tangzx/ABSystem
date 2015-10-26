@@ -85,6 +85,7 @@ public abstract class AssetBundleBuilderBase
             List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
             foreach (AssetTarget target in all)
             {
+                target.AnalyzeIfDepTreeChanged();
                 BuildExportTree(target, tree, 0);
             }
 

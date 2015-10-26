@@ -67,7 +67,10 @@ namespace Uzen.AB
         private bool _isFileChanged = false;
         //是否已分析过依赖
         private bool _isAnalyzed = false;
-
+        //依赖树是否改变（用于增量打包）
+        private bool _isDepTreeChanged = false;
+        //上次打包的信息（用于增量打包）
+        private AssetCacheInfo _cacheInfo;
         /// <summary>
         /// 我要依赖的项
         /// </summary>
@@ -103,9 +106,9 @@ namespace Uzen.AB
             if (_isAnalyzed) return;
             _isAnalyzed = true;
 
-            string oldHash = AssetBundleUtils.GetOldHash(assetPath);
-            _isFileChanged = oldHash == null || !oldHash.Equals(GetHash());
-            if (_isFileChanged && oldHash != null)
+            _cacheInfo = AssetBundleUtils.GetCacheInfo(assetPath);
+            _isFileChanged = _cacheInfo == null || !_cacheInfo.fileHash.Equals(GetHash());
+            if (_isFileChanged && _cacheInfo != null)
                 Debug.Log("file is changed : " + assetPath);
 
             Object[] deps = EditorUtility.CollectDependencies(new Object[] { asset });
@@ -198,6 +201,37 @@ namespace Uzen.AB
             }
         }
 
+        /// <summary>
+        /// 判断是否依赖树变化了
+        /// 如果现在的依赖和之前的依赖不一样了则改变了，需要重新打包
+        /// </summary>
+        public void AnalyzeIfDepTreeChanged()
+        {
+            _isDepTreeChanged = false;
+            if (_cacheInfo != null)
+            {
+                HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
+                this.GetDependencies(deps);
+                AssetTarget[] ar = deps.ToArray();
+
+                if (deps.Count != _cacheInfo.depNames.Length)
+                {
+                    _isDepTreeChanged = true;
+                }
+                else
+                {
+                    foreach (AssetTarget dep in deps)
+                    {
+                        if (!ArrayUtility.Contains<string>(_cacheInfo.depNames, dep.assetPath))
+                        {
+                            _isDepTreeChanged = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         public void UpdateLevel(int level, List<AssetTarget> lvList)
         {
             this.level = level;
@@ -236,7 +270,7 @@ namespace Uzen.AB
         {
             get
             {
-                if (_isFileChanged)
+                if (_isFileChanged || _isDepTreeChanged)
                     return true;
 
                 foreach (AssetTarget child in _dependsChildren)
@@ -266,12 +300,10 @@ namespace Uzen.AB
         {
             get
             {
-                if (isExported || type == AssetType.Builtin)
+                if (isExported)
                     return false;
 
-                bool v = exportType == ExportType.Root || exportType == ExportType.Standalone;
-
-                v &= needRebuild;
+                bool v = needSelfExport && needRebuild;
 
                 return v;
             }
@@ -472,6 +504,13 @@ namespace Uzen.AB
         {
             sw.WriteLine(this.assetPath);
             sw.WriteLine(GetHash());
+            HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
+            this.GetDependencies(deps);
+            sw.WriteLine(deps.Count.ToString());
+            foreach (AssetTarget at in deps)
+            {
+                sw.WriteLine(at.assetPath);
+            }
         }
     }
 }
