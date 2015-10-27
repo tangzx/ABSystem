@@ -169,7 +169,7 @@ public class AssetBundleInfo
             dep.Release();
         }
         deps.Clear();
-
+        references.Clear();
         if (onUnloaded != null)
             onUnloaded(this);
     }
