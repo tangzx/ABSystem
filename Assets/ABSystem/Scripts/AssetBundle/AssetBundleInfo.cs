@@ -40,12 +40,12 @@ public class AssetBundleInfo
         }
     }
 
-    void Retain()
+    public void Retain()
     {
         refCount++;
     }
 
-    void Release()
+    public void Release()
     {
         refCount--;
     }
@@ -54,7 +54,7 @@ public class AssetBundleInfo
     /// 增加引用
     /// </summary>
     /// <param name="owner">用来计算引用计数，如果所有的引用对象被销毁了，那么AB也将会被销毁</param>
-    public void Retain(object owner)
+    public void Retain(Object owner)
     {
         if (owner == null)
             throw new Exception("Please set the user!");
@@ -98,7 +98,8 @@ public class AssetBundleInfo
             if (mainObject is GameObject)
             {
                 Object inst = Object.Instantiate(mainObject);
-                this.Retain(inst);
+                //这里去掉，用Tracker进行跟踪了
+                //this.Retain(inst);
                 return (GameObject)inst;
             }
         }
@@ -110,7 +111,7 @@ public class AssetBundleInfo
     /// </summary>
     /// <param name="user">增加引用的对象</param>
     /// <returns></returns>
-    public Object Require(object user)
+    public Object Require(Object user)
     {
         this.Retain(user);
         return mainObject;
@@ -134,7 +135,8 @@ public class AssetBundleInfo
     {
         for (int i = 0; i < references.Count; i++)
         {
-            if (references[i].Target == null)
+            Object o = (Object)references[i].Target;
+            if (!o)
             {
                 references.RemoveAt(i);
                 i--;
@@ -179,15 +181,49 @@ public class AssetBundleInfo
         set { _isReady = value; }
     }
 
-    protected virtual Object mainObject
+    public virtual Object mainObject
     {
         get
         {
             if (_mainObject == null && _isReady)
             {
                 _mainObject = bundle.mainAsset;
+                if (_mainObject is GameObject)
+                {
+                    GameObject go = (GameObject)_mainObject;
+                    GameObjectTracker tracker = go.AddComponent<GameObjectTracker>();
+                    tracker.bundleName = this.bundleName;
+                }
             }
             return _mainObject;
+        }
+    }
+}
+
+/// <summary>
+/// 生命周期追踪器
+/// </summary>
+class GameObjectTracker : MonoBehaviour
+{
+    public string bundleName;
+
+    void Awake()
+    {
+        if (bundleName != null)
+        {
+            AssetBundleInfo abi = AssetBundleManager.Instance.GetBundleInfo(bundleName);
+            if (abi != null)
+                abi.Retain(this);
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (bundleName != null)
+        {
+            AssetBundleInfo abi = AssetBundleManager.Instance.GetBundleInfo(bundleName);
+            if (abi != null)
+                abi.Release(this);
         }
     }
 }

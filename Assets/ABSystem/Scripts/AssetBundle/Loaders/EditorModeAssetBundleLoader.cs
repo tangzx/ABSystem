@@ -11,7 +11,7 @@ public class EditorModeAssetBundleLoader : AssetBundleLoader
 {
     class ABInfo : AssetBundleInfo
     {
-        protected override Object mainObject
+        public override Object mainObject
         {
             get
             {
