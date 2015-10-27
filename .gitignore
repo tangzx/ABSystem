@@ -3,6 +3,11 @@
 /Library
 /Temp
 
+/Assets/AssetBundles/cache.txt
+/Assets/AssetBundles/cache.txt.meta
+/Assets/StreamingAssets/AssetBundles/dep.all
+/Assets/StreamingAssets/AssetBundles/dep.all.meta
+
 *.csproj
 *.sln
 *.suo
