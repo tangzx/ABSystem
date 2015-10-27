@@ -130,7 +130,7 @@ public class AssetBundleInfo
             return Require(c);
     }
 
-    void UpdateReference()
+    int UpdateReference()
     {
         for (int i = 0; i < references.Count; i++)
         {
@@ -140,6 +140,7 @@ public class AssetBundleInfo
                 i--;
             }
         }
+        return references.Count;
     }
 
     /// <summary>
@@ -148,8 +149,7 @@ public class AssetBundleInfo
     /// <returns></returns>
     public bool IsUnused()
     {
-        this.UpdateReference();
-        return _isReady && refCount <= 0 && references.Count == 0;
+        return _isReady && refCount <= 0 && this.UpdateReference() == 0;
     }
 
     public virtual void Dispose()
