@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -82,7 +83,7 @@ namespace Uzen.AB
         public void Init(Action callback)
         {
             _initCallback = callback;
-            LoadDepInfo();
+            this.StartCoroutine(LoadDepInfo());
         }
 
         public void Init(Stream depStream, Action callback)
@@ -101,11 +102,10 @@ namespace Uzen.AB
             _initCallback = null;
         }
 
-        void LoadDepInfo()
+        IEnumerator LoadDepInfo()
         {
             _depInfoReader = new AssetBundleDataReader();
             string depFile = string.Format("{0}/{1}", pathResolver.BundleCacheDir, pathResolver.DependFileName);
-            string srcFile = pathResolver.GetBundleSourceFile(pathResolver.DependFileName);
 
             if (File.Exists(depFile))
             {
@@ -115,7 +115,20 @@ namespace Uzen.AB
             }
             else
             {
-                Debug.LogError(string.Format("{0} not exist!", depFile));
+                string srcURL = pathResolver.GetBundleSourceFile(pathResolver.DependFileName);
+                WWW w = new WWW(srcURL);
+                yield return w;
+
+                if (w.error == null)
+                {
+                    _depInfoReader.Read(new MemoryStream(w.bytes));
+
+                    File.WriteAllBytes(depFile, w.bytes);
+                }
+                else
+                {
+                    Debug.LogError(string.Format("{0} not exist!", depFile));
+                }
             }
             this.InitComplete();
         }
