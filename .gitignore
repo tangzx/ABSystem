@@ -5,8 +5,8 @@
 
 /Assets/AssetBundles/cache.txt
 /Assets/AssetBundles/cache.txt.meta
-/Assets/StreamingAssets/AssetBundles/dep.all
-/Assets/StreamingAssets/AssetBundles/dep.all.meta
+/Assets/StreamingAssets/AssetBundles
+/Assets/StreamingAssets/AssetBundles.meta
 
 *.csproj
 *.sln
