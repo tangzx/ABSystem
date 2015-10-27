@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -63,7 +64,9 @@ namespace Uzen.AB
 
         public AssetBundlePathResolver pathResolver;
 
-        private AssetBundleDataReader depInfoReader;
+        private AssetBundleDataReader _depInfoReader;
+
+        private Action _initCallback;
 
         public AssetBundleManager()
         {
@@ -74,25 +77,47 @@ namespace Uzen.AB
         protected void Awake()
         {
 			InvokeRepeating("CheckUnusedBundle", 0, 5);
+        }
+
+        public void Init(Action callback)
+        {
+            _initCallback = callback;
             LoadDepInfo();
+        }
+
+        public void Init(Stream depStream, Action callback)
+        {
+            _initCallback = callback;
+            _depInfoReader = new AssetBundleDataReader();
+            _depInfoReader.Read(depStream);
+            depStream.Close();
+            this.InitComplete();
+        }
+
+        void InitComplete()
+        {
+            if (_initCallback != null)
+                _initCallback();
+            _initCallback = null;
         }
 
         void LoadDepInfo()
         {
-            depInfoReader = new AssetBundleDataReader();
+            _depInfoReader = new AssetBundleDataReader();
             string depFile = string.Format("{0}/{1}", pathResolver.BundleCacheDir, pathResolver.DependFileName);
             string srcFile = pathResolver.GetBundleSourceFile(pathResolver.DependFileName);
 
             if (File.Exists(depFile))
             {
                 FileStream fs = new FileStream(depFile, FileMode.Open);
-                depInfoReader.Read(fs);
+                _depInfoReader.Read(fs);
                 fs.Close();
             }
             else
             {
                 Debug.LogError(string.Format("{0} not exist!", depFile));
             }
+            this.InitComplete();
         }
 
         void OnDestroy()
@@ -107,7 +132,7 @@ namespace Uzen.AB
         /// <returns></returns>
         public string GetAssetBundleFullName(string shortFileName)
         {
-            return depInfoReader.GetFullName(shortFileName);
+            return _depInfoReader.GetFullName(shortFileName);
         }
 
         public AssetBundleLoader Load(string path, LoadAssetCompleteHandler handler = null)
@@ -142,7 +167,7 @@ namespace Uzen.AB
             }
             else
             {
-                AssetBundleData data = depInfoReader.GetAssetBundleInfo(path);
+                AssetBundleData data = _depInfoReader.GetAssetBundleInfo(path);
                 loader = this.CreateLoader(data);
                 loader.bundleManager = this;
                 loader.bundleData = data;
