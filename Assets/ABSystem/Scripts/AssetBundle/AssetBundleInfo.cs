@@ -12,7 +12,6 @@ public class AssetBundleInfo
     internal AssetBundle bundle;
 
     public string bundleName;
-    public string path;
     public AssetBundleLoader loader;
 
     private bool _isReady;
@@ -156,7 +155,7 @@ public class AssetBundleInfo
 
     public virtual void Dispose()
     {
-        Debug.Log("Unload : " + path);
+        Debug.Log("Unload : " + bundleName);
 
         if (bundle != null)
             bundle.Unload(false);

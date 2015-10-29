@@ -15,7 +15,7 @@ public class EditorModeAssetBundleLoader : AssetBundleLoader
         {
             get
             {
-                string newPath = AssetBundlePathResolver.instance.GetEditorModePath(path);
+                string newPath = AssetBundlePathResolver.instance.GetEditorModePath(bundleName);
                 Object mainObject = AssetDatabase.LoadMainAssetAtPath(newPath);
                 return mainObject;
             }

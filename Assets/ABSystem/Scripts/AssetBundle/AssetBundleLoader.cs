@@ -11,7 +11,6 @@ namespace Uzen.AB
     {
         internal AssetBundleManager.LoadAssetCompleteHandler onComplete;
 
-        public string path;
         public string bundleName;
         public AssetBundleData bundleData;
         public AssetBundleInfo bundleInfo;

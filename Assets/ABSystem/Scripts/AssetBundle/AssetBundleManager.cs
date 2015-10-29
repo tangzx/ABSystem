@@ -83,7 +83,11 @@ namespace Uzen.AB
         public void Init(Action callback)
         {
             _initCallback = callback;
+#if !AB_MODE && UNITY_EDITOR
+            this.InitComplete();
+#else
             this.StartCoroutine(LoadDepInfo());
+#endif
         }
 
         public void Init(Stream depStream, Action callback)
@@ -180,19 +184,22 @@ namespace Uzen.AB
             }
             else
             {
-                AssetBundleData data = _depInfoReader.GetAssetBundleInfo(path);
-                loader = this.CreateLoader(data);
+                loader = this.CreateLoader();
                 loader.bundleManager = this;
+#if !AB_MODE && UNITY_EDITOR
+                loader.bundleName = path;
+#else
+                AssetBundleData data = _depInfoReader.GetAssetBundleInfo(path);
                 loader.bundleData = data;
-                loader.path = loader.bundleData.fullName;
-                loader.bundleName = loader.bundleData.fullName;
+                loader.bundleName = data.fullName;
+#endif
                 _loaderCache[path] = loader;
             }
 
             return loader;
         }
 
-        protected virtual AssetBundleLoader CreateLoader(AssetBundleData data)
+        protected virtual AssetBundleLoader CreateLoader()
         {
 #if UNITY_EDITOR && AB_MODE
             return new MobileAssetBundleLoader();
@@ -342,7 +349,6 @@ namespace Uzen.AB
             if (abi == null)
                 abi = new AssetBundleInfo();
             abi.bundleName = loader.bundleName;
-            abi.path = loader.path;
             abi.bundle = assetBundle;
             abi.loader = loader;
 
