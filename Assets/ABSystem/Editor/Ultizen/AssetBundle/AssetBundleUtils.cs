@@ -13,6 +13,10 @@ namespace Uzen.AB
     {
         public string fileHash;
         /// <summary>
+        /// 上次打好的AB的CRC值，用于增量判断
+        /// </summary>
+        public uint bundleCrc;
+        /// <summary>
         /// 所依赖的那些文件
         /// </summary>
         public string[] depNames;
@@ -55,6 +59,21 @@ namespace Uzen.AB
             {
                 string value = File.ReadAllText(cacheTxtFilePath);
                 StringReader sr = new StringReader(value);
+
+                //版本比较
+                string vString = sr.ReadLine();
+                bool wrongVer = false;
+                try
+                {
+                    Version ver = new Version(vString);
+                    wrongVer = ver.Minor > AssetBundleManager.version.Minor || ver.Major > AssetBundleManager.version.Major;
+                }
+                catch (Exception) { wrongVer = true; }
+
+                if (wrongVer)
+                    return;
+
+                //读取缓存的信息
                 while (true)
                 {
                     string path = sr.ReadLine();
@@ -63,7 +82,7 @@ namespace Uzen.AB
 
                     AssetCacheInfo cache = new AssetCacheInfo();
                     cache.fileHash = sr.ReadLine();
-
+                    cache.bundleCrc = Convert.ToUInt32(sr.ReadLine());
                     int depsCount = Convert.ToInt32(sr.ReadLine());
                     cache.depNames = new string[depsCount];
                     for (int i = 0; i < depsCount; i++)
@@ -79,7 +98,7 @@ namespace Uzen.AB
         public static void SaveCache()
         {
             StreamWriter sw = new StreamWriter(pathResolver.HashCacheSaveFile);
-
+            sw.WriteLine(AssetBundleManager.version.ToString());
             foreach (AssetTarget target in _object2target.Values)
             {
                 target.WriteCache(sw);

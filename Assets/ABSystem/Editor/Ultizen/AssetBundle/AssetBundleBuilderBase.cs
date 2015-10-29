@@ -143,7 +143,7 @@ public abstract class AssetBundleBuilderBase
 
         foreach (AssetTarget ei in levelList)
         {
-            Export(ei, ei.needExport);
+            Export(ei);
         }
         if (currentLevel < tree.Count)
         {
@@ -152,14 +152,15 @@ public abstract class AssetBundleBuilderBase
         BuildPipeline.PopAssetDependencies();
     }
 
-    void Export(AssetTarget target, bool force)
+    void Export(AssetTarget target)
     {
-        if (target.needExport || force)
+        if (target.needExport)
         {
             //写入 .assetbundle 包
             target.WriteBundle(options);
 
-            newBuildTargets.Add(target);
+            if (target.isNewBuild)
+                newBuildTargets.Add(target);
         }
     }
 

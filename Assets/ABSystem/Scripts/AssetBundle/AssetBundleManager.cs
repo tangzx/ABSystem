@@ -16,6 +16,7 @@ namespace Uzen.AB
 
     public class AssetBundleManager : MonoBehaviour
     {
+        public static Version version = new Version(0, 0, 1);
         public static AssetBundleManager Instance;
         public static string NAME = "AssetBundleManager";
 

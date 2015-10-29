@@ -27,9 +27,6 @@ namespace Uzen.AB
 
     public class AssetTarget : System.IComparable<AssetTarget>
     {
-        const int MinTexturePixels = 128 * 128;
-        const float MinAudioClipLength = 2f;
-
         /// <summary>
         /// 目标Object
         /// </summary>
@@ -58,6 +55,9 @@ namespace Uzen.AB
         /// 保存地址
         /// </summary>
         public string bundleSavePath;
+        /// <summary>
+        /// BundleName
+        /// </summary>
         public string bundleName;
 
         public int level = -1;
@@ -71,6 +71,10 @@ namespace Uzen.AB
         private bool _isDepTreeChanged = false;
         //上次打包的信息（用于增量打包）
         private AssetCacheInfo _cacheInfo;
+        //上次打好的AB的CRC值（用于增量打包）
+        private uint _bundleCrc;
+        //是否是新打包的
+        private bool _isNewBuild;
         /// <summary>
         /// 我要依赖的项
         /// </summary>
@@ -85,14 +89,8 @@ namespace Uzen.AB
             this.asset = o;
             this.file = file;
             this.assetPath = assetPath;
-            if (string.IsNullOrEmpty(assetPath))
-            {
-                this.file = new FileInfo(AssetBundleUtils.AssetPath + "/mark");
-                this.type = AssetType.Builtin;
-            }
-
-            bundleName = AssetBundleUtils.ConvertToABName(assetPath);
-            bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
+            this.bundleName = AssetBundleUtils.ConvertToABName(assetPath);
+            this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
 
             _isFileChanged = true;
         }
@@ -108,8 +106,12 @@ namespace Uzen.AB
 
             _cacheInfo = AssetBundleUtils.GetCacheInfo(assetPath);
             _isFileChanged = _cacheInfo == null || !_cacheInfo.fileHash.Equals(GetHash());
-            if (_isFileChanged && _cacheInfo != null)
-                Debug.Log("file is changed : " + assetPath);
+            if (_cacheInfo != null)
+            {
+                _bundleCrc = _cacheInfo.bundleCrc;
+                if (_isFileChanged)
+                    Debug.Log("File was changed : " + assetPath);
+            }
 
             Object[] deps = EditorUtility.CollectDependencies(new Object[] { asset });
             //提取 resource.builtin
@@ -266,6 +268,14 @@ namespace Uzen.AB
             get { return new List<AssetTarget>(_dependencies); }
         }
 
+        public bool isNewBuild
+        {
+            get { return _isNewBuild; }
+        }
+
+        /// <summary>
+        /// 是不是需要重编
+        /// </summary>
         public bool needRebuild
         {
             get
@@ -283,6 +293,22 @@ namespace Uzen.AB
             }
         }
 
+        /// <summary>
+        /// 是不是自己的原因需要重编的，有的可能是因为被依赖项的原因需要重编
+        /// </summary>
+        public bool needSelfRebuild
+        {
+            get
+            {
+                if (_isFileChanged || _isDepTreeChanged)
+                    return true;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 是不是自身的原因需要导出如指定的类型prefab等，有些情况下是因为依赖树原因需要单独导出
+        /// </summary>
         public bool needSelfExport
         {
             get
@@ -296,6 +322,9 @@ namespace Uzen.AB
             }
         }
 
+        /// <summary>
+        /// 是否需要导出
+        /// </summary>
         public bool needExport
         {
             get
@@ -431,7 +460,7 @@ namespace Uzen.AB
 
         public void WriteBundle(BuildAssetBundleOptions options)
         {
-            Debug.Log("Export : >>>>> " + this.assetPath);
+            string savePath = Path.Combine(Path.GetTempPath(), bundleName);
 
             this.isExported = true;
 
@@ -446,14 +475,14 @@ namespace Uzen.AB
                 assets[i + 1] = children[i].asset;
             }
 
-            string savePath = bundleSavePath;
-
+            uint crc = 0;
             if (file.Extension.EndsWith("unity"))
             {
                 BuildPipeline.BuildStreamedSceneAssetBundle(
                     new string[] { file.FullName },
                     savePath,
                     EditorUserBuildSettings.activeBuildTarget,
+                    out crc,
                     BuildOptions.UncompressedAssetBundle);
             }
             else
@@ -462,9 +491,18 @@ namespace Uzen.AB
                     asset,
                     assets,
                     savePath,
+                    out crc,
                     options,
                     EditorUserBuildSettings.activeBuildTarget);
             }
+
+            _isNewBuild = crc != this._bundleCrc;
+            if (_isNewBuild)
+            {
+                File.Copy(savePath, bundleSavePath, true);
+                Debug.Log("Export AB : " + bundleName);
+            }
+            _bundleCrc = crc;
         }
 
         public void WriteDependInfo(StreamWriter sw)
@@ -474,7 +512,7 @@ namespace Uzen.AB
 
             sw.WriteLine(bundleName);
             //hash
-            sw.WriteLine(GetHash());
+            sw.WriteLine(_bundleCrc.ToString());
             //写入依赖信息
             sw.WriteLine(string.Format("{0}", deps.Count));
             //File Name
@@ -504,6 +542,7 @@ namespace Uzen.AB
         {
             sw.WriteLine(this.assetPath);
             sw.WriteLine(GetHash());
+            sw.WriteLine(this._bundleCrc);
             HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
             this.GetDependencies(deps);
             sw.WriteLine(deps.Count.ToString());
