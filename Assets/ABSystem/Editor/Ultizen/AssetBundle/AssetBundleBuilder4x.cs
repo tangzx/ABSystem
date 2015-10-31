@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Uzen.AB;
 
-public abstract class AssetBundleBuilderBase
+public abstract class AssetBundleBuilder4x : ABBuilder
 {
     static BuildAssetBundleOptions options =
         BuildAssetBundleOptions.DeterministicAssetBundle |
@@ -18,70 +18,19 @@ public abstract class AssetBundleBuilderBase
     /// </summary>
     protected List<AssetTarget> newBuildTargets = new List<AssetTarget>();
 
-    protected AssetBundlePathResolver pathResolver;
-
-    public AssetBundleBuilderBase(AssetBundlePathResolver pathResolver)
+    public AssetBundleBuilder4x(AssetBundlePathResolver pathResolver) : base(pathResolver)
     {
-        this.pathResolver = pathResolver;
-        this.InitDirs();
-        AssetBundleUtils.pathResolver = pathResolver;
+
     }
 
-    void InitDirs()
-    {
-        new DirectoryInfo(pathResolver.BundleSavePath).Create();
-        new FileInfo(pathResolver.HashCacheSaveFile).Directory.Create();
-    }
-
-    public void Begin()
-    {
-        EditorUtility.DisplayProgressBar("Loading", "Loading...", 0.1f);
-        AssetBundleUtils.Init();
-    }
-
-    public void AddRootTargets(DirectoryInfo bundleDir, string[] partterns = null, SearchOption searchOption = SearchOption.AllDirectories)
-    {
-        if (partterns == null)
-            partterns = new string[] { "*.*" };
-        for (int i = 0; i < partterns.Length; i++)
-        {
-            FileInfo[] prefabs = bundleDir.GetFiles(partterns[i], searchOption);
-            foreach (FileInfo file in prefabs)
-            {
-                AssetTarget target = AssetBundleUtils.Load(file);
-                target.exportType = ExportType.Root;
-            }
-        }
-    }
-
-    public void End()
-    {
-        AssetBundleUtils.ClearCache();
-        EditorUtility.ClearProgressBar();
-    }
-
-    public void Export()
+    public override void Export()
     {
         try
         {
-            var all = AssetBundleUtils.GetAll();
-            foreach (AssetTarget target in all)
-            {
-                target.Analyze();
-            }
-            all = AssetBundleUtils.GetAll();
-            foreach (AssetTarget target in all)
-            {
-                target.Merge();
-            }
-            all = AssetBundleUtils.GetAll();
-            foreach (AssetTarget target in all)
-            {
-                target.BeforeExport();
-            }
+            base.Export();
 
             //Build Export Tree
-            all = AssetBundleUtils.GetAll();
+            var all = AssetBundleUtils.GetAll();
             List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
             foreach (AssetTarget target in all)
             {
@@ -93,8 +42,6 @@ public abstract class AssetBundleBuilderBase
             this.Export(tree, 0);
             this.SaveDepAll(all);
             this.RemoveUnused(all);
-
-            AssetBundleUtils.SaveCache();
         }
         catch(Exception e)
         {

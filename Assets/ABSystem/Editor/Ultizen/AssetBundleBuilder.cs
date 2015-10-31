@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEditor;
 
-public class AssetBundleBuilder : AssetBundleBuilderBase
+public class AssetBundleBuilder : AssetBundleBuilder4x
 {
     public AssetBundleBuilder() : base(new AssetBundlePathResolver())
     {
