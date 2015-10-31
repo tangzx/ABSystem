@@ -26,7 +26,9 @@ class AssetBundleDataReader
             string name = sr.ReadLine();
             if (string.IsNullOrEmpty(name))
                 break;
-            
+
+            name = name.ToLower();
+
             //去除 .info
             string hash = sr.ReadLine();
             int depsCount = Convert.ToInt32(sr.ReadLine());

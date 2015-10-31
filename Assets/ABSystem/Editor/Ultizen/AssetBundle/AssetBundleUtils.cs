@@ -207,7 +207,8 @@ namespace Uzen.AB
                 .Replace(AssetBundleUtils.AssetPath, "")
                 .Replace('\\', '.')
                 .Replace('/', '.')
-                .Replace(" ", "_");
+                .Replace(" ", "_")
+                .ToLower();
             return bn + ".ab";
         }
 

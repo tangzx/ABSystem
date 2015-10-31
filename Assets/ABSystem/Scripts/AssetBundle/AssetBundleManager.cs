@@ -177,6 +177,8 @@ namespace Uzen.AB
 
         internal AssetBundleLoader CreateLoader(string path)
         {
+            path = path.ToLower();
+
             AssetBundleLoader loader = null;
 
             if (_loaderCache.ContainsKey(path))
