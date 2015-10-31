@@ -119,13 +119,19 @@ namespace Uzen.AB
             for (int i = 0; i < deps.Length; i++)
             {
                 Object o = deps[i];
+                //不包含脚本对象
                 if (o is MonoScript)
+                    continue;
+
+                //不包含builtin对象
+                string path = AssetDatabase.GetAssetPath(o);
+                if (path.StartsWith("Resources"))
                     continue;
 
                 depList.Add(o);
             }
             deps = depList.ToArray();
-#endif
+#else
             //提取 resource.builtin
             for (int i = 0; i < deps.Length; i++)
             {
@@ -138,6 +144,8 @@ namespace Uzen.AB
                     builtinAsset.Analyze();
                 }
             }
+#endif
+
             var res = from s in deps
                       let obj = AssetDatabase.GetAssetPath(s)
                       select obj;
