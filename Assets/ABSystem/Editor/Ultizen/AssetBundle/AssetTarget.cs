@@ -114,6 +114,18 @@ namespace Uzen.AB
             }
 
             Object[] deps = EditorUtility.CollectDependencies(new Object[] { asset });
+#if UNITY_5
+            List<Object> depList = new List<Object>();
+            for (int i = 0; i < deps.Length; i++)
+            {
+                Object o = deps[i];
+                if (o is MonoScript)
+                    continue;
+
+                depList.Add(o);
+            }
+            deps = depList.ToArray();
+#endif
             //提取 resource.builtin
             for (int i = 0; i < deps.Length; i++)
             {
