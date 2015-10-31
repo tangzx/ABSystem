@@ -1,20 +1,19 @@
 ﻿using System.IO;
 using UnityEditor;
 
-public class AssetBundleBuilder : AssetBundleBuilder4x
+public class AssetBundleBuilder
 {
-    public AssetBundleBuilder() : base(new AssetBundlePathResolver())
-    {
-
-    }
-
     [MenuItem("Tang/Build AssetBundles")]
     public static void BuildAssetBundles()
     {
-        AssetBundleBuilder builder = new AssetBundleBuilder();
+#if UNITY_5
+        ABBuilder builder = new AssetBundleBuilder5x(new AssetBundlePathResolver());
+#else
+        ABBuilder builder = new AssetBundleBuilder4x(new AssetBundlePathResolver());
+#endif
         builder.Begin();
 
-        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab","*.png" });
+        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab" });
 
         builder.Export();
         builder.End();
