@@ -110,48 +110,4 @@ public abstract class AssetBundleBuilder4x : ABBuilder
                 newBuildTargets.Add(target);
         }
     }
-
-    void SaveDepAll(List<AssetTarget> all)
-    {
-        string path = Path.Combine(pathResolver.BundleSavePath, pathResolver.DependFileName);
-
-        if (File.Exists(path))
-            File.Delete(path);
-        FileStream fs = new FileStream(path, FileMode.CreateNew);
-        StreamWriter sw = new StreamWriter(fs);
-        for (int i = 0; i < all.Count; i++)
-        {
-            AssetTarget target = all[i];
-            if (target.needSelfExport)
-                target.WriteDependInfo(sw);
-        }
-        sw.Close();
-        fs.Close();
-    }
-
-    /// <summary>
-    /// 删除未使用的AB，可能是上次打包出来的，而这一次没生成的
-    /// </summary>
-    /// <param name="all"></param>
-    void RemoveUnused(List<AssetTarget> all)
-    {
-        HashSet<string> usedSet = new HashSet<string>();
-        for (int i = 0; i < all.Count; i++)
-        {
-            AssetTarget target = all[i];
-            if (target.needSelfExport)
-                usedSet.Add(target.bundleName);
-        }
-
-        DirectoryInfo di = new DirectoryInfo(pathResolver.BundleSavePath);
-        FileInfo[] abFiles = di.GetFiles("*.ab");
-        for (int i = 0; i < abFiles.Length; i++)
-        {
-            FileInfo fi = abFiles[i];
-            if (usedSet.Add(fi.Name))
-            {
-                fi.Delete();
-            }
-        }
-    }
 }

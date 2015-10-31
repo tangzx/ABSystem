@@ -186,7 +186,12 @@ public class AssetBundleInfo
         {
             if (_mainObject == null && _isReady)
             {
+#if UNITY_5
+                string[] names = bundle.GetAllAssetNames();
+                _mainObject = bundle.LoadAsset(names[0]);
+#else
                 _mainObject = bundle.mainAsset;
+#endif
                 if (_mainObject is GameObject)
                 {
                     GameObject go = (GameObject)_mainObject;
