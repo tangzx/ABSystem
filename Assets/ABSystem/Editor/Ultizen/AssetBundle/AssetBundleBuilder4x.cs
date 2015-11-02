@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Uzen.AB;
 
-public abstract class AssetBundleBuilder4x : ABBuilder
+public class AssetBundleBuilder4x : ABBuilder
 {
     static BuildAssetBundleOptions options =
         BuildAssetBundleOptions.DeterministicAssetBundle |
