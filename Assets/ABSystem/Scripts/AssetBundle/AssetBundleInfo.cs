@@ -148,9 +148,9 @@ public class AssetBundleInfo
     /// 这个资源是否不用了
     /// </summary>
     /// <returns></returns>
-    public bool IsUnused()
+    public bool isUnused
     {
-        return _isReady && refCount <= 0 && this.UpdateReference() == 0;
+        get { return _isReady && refCount <= 0 && this.UpdateReference() == 0; }
     }
 
     public virtual void Dispose()
@@ -213,6 +213,8 @@ class GameObjectTracker : MonoBehaviour
 
     void Awake()
     {
+        hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
+
         if (bundleName != null)
         {
             AssetBundleInfo abi = AssetBundleManager.Instance.GetBundleInfo(bundleName);

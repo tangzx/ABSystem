@@ -398,7 +398,7 @@ namespace Uzen.AB
 
                         string key = keys[i];
                         AssetBundleInfo abi = _loadedAssetBundle[key];
-                        if (abi.IsUnused())
+                        if (abi.isUnused)
                         {
                             hasUnusedBundle = true;
                             unloadCount++;
