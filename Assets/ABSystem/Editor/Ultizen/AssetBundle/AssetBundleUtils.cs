@@ -15,7 +15,7 @@ namespace Uzen.AB
         /// <summary>
         /// 上次打好的AB的CRC值，用于增量判断
         /// </summary>
-        public uint bundleCrc;
+        public string bundleCrc;
         /// <summary>
         /// 所依赖的那些文件
         /// </summary>
@@ -82,7 +82,7 @@ namespace Uzen.AB
 
                     AssetCacheInfo cache = new AssetCacheInfo();
                     cache.fileHash = sr.ReadLine();
-                    cache.bundleCrc = Convert.ToUInt32(sr.ReadLine());
+                    cache.bundleCrc = sr.ReadLine();
                     int depsCount = Convert.ToInt32(sr.ReadLine());
                     cache.depNames = new string[depsCount];
                     for (int i = 0; i < depsCount; i++)

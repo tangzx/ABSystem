@@ -72,7 +72,7 @@ namespace Uzen.AB
         //上次打包的信息（用于增量打包）
         private AssetCacheInfo _cacheInfo;
         //上次打好的AB的CRC值（用于增量打包）
-        private uint _bundleCrc;
+        private string _bundleCrc;
         //是否是新打包的
         private bool _isNewBuild;
         /// <summary>
@@ -291,6 +291,20 @@ namespace Uzen.AB
         public bool isNewBuild
         {
             get { return _isNewBuild; }
+        }
+
+        public string bundleCrc
+        {
+            get { return _bundleCrc; }
+            set
+            {
+                _isNewBuild = value != _bundleCrc;
+                if (_isNewBuild)
+                {
+                    Debug.Log("Export AB : " + bundleName);
+                }
+                _bundleCrc = value;
+            }
         }
 
         /// <summary>
@@ -516,13 +530,10 @@ namespace Uzen.AB
                     EditorUserBuildSettings.activeBuildTarget);
             }
 
-            _isNewBuild = crc != this._bundleCrc;
+            bundleCrc = crc.ToString();
+
             if (_isNewBuild)
-            {
                 File.Copy(savePath, bundleSavePath, true);
-                Debug.Log("Export AB : " + bundleName);
-            }
-            _bundleCrc = crc;
         }
 
         public void WriteDependInfo(StreamWriter sw)
