@@ -17,9 +17,9 @@ public class AssetBundleDataReader
 {
     public Dictionary<string, AssetBundleData> infoMap = new Dictionary<string, AssetBundleData>();
 
-    private Dictionary<string, string> shortName2FullName = new Dictionary<string, string>();
+    protected Dictionary<string, string> shortName2FullName = new Dictionary<string, string>();
 
-    public void Read(Stream fs)
+    public virtual void Read(Stream fs)
     {
         StreamReader sr = new StreamReader(fs);
         while (true)
@@ -28,9 +28,7 @@ public class AssetBundleDataReader
             if (string.IsNullOrEmpty(name))
                 break;
 
-            name = name.ToLower();
-
-            string shortFileName = sr.ReadLine().ToLower();
+            string shortFileName = sr.ReadLine();
             string hash = sr.ReadLine();
             int typeData = Convert.ToInt32(sr.ReadLine());
             int depsCount = Convert.ToInt32(sr.ReadLine());
@@ -49,10 +47,9 @@ public class AssetBundleDataReader
             info.shortName = shortFileName;
             info.dependencies = deps;
             info.type = (AssetBundleExportType)typeData;
-            infoMap[name.ToLower()] = info;
+            infoMap[name] = info;
         }
         sr.Close();
-        fs.Close();
     }
 
     /// <summary>
