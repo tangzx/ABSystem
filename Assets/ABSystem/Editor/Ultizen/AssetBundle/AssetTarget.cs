@@ -536,39 +536,6 @@ namespace Uzen.AB
                 File.Copy(savePath, bundleSavePath, true);
         }
 
-        public void WriteDependInfo(StreamWriter sw)
-        {
-            HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
-            this.GetDependencies(deps);
-
-            sw.WriteLine(bundleName);
-            //hash
-            sw.WriteLine(_bundleCrc.ToString());
-            //写入依赖信息
-            sw.WriteLine(string.Format("{0}", deps.Count));
-            //File Name
-            sw.WriteLine(file.Name);
-
-            foreach (AssetTarget item in deps)
-            {
-                sw.WriteLine(item.bundleName);
-            }
-        }
-
-        public void WriteDependInfo()
-        {
-            string path = string.Format("{0}.info", bundleSavePath);
-            FileInfo fi = new FileInfo(path);
-            if (fi.Exists)
-                fi.Delete();
-            FileStream fs = new FileStream(path, FileMode.CreateNew);
-            StreamWriter sw = new StreamWriter(fs);
-            this.WriteDependInfo(sw);
-            sw.Flush();
-            sw.Close();
-            fs.Close();
-        }
-
         public void WriteCache(StreamWriter sw)
         {
             sw.WriteLine(this.assetPath);

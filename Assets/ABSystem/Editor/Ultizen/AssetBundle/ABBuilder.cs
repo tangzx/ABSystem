@@ -1,7 +1,7 @@
-﻿using Uzen.AB;
-using UnityEditor;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Collections.Generic;
+using UnityEditor;
+using Uzen.AB;
 
 public class ABBuilder
 {
@@ -84,16 +84,9 @@ public class ABBuilder
 
         if (File.Exists(path))
             File.Delete(path);
-        FileStream fs = new FileStream(path, FileMode.CreateNew);
-        StreamWriter sw = new StreamWriter(fs);
-        for (int i = 0; i < all.Count; i++)
-        {
-            AssetTarget target = all[i];
-            if (target.needSelfExport)
-                target.WriteDependInfo(sw);
-        }
-        sw.Close();
-        fs.Close();
+
+        AssetBundleDataWriter writer = new AssetBundleDataWriter();
+        writer.Save(path, all.ToArray());
     }
 
     /// <summary>
