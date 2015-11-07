@@ -95,11 +95,25 @@ namespace Uzen.AB
 
         public void Init(Stream depStream, Action callback)
         {
-            _initCallback = callback;
-            _depInfoReader = new AssetBundleDataReader();
-            _depInfoReader.Read(depStream);
+            if (depStream.Length > 4)
+            {
+                BinaryReader br = new BinaryReader(depStream);
+                if (br.ReadChar() == 'A' && br.ReadChar() == 'B' && br.ReadChar() == 'D')
+                {
+                    if (br.ReadChar() == 'T')
+                        _depInfoReader = new AssetBundleDataReader();
+                    else
+                        _depInfoReader = new AssetBundleDataBinaryReader();
+
+                    depStream.Position = 0;
+                    _depInfoReader.Read(depStream);
+                }
+            }
+
             depStream.Close();
-            this.InitComplete();
+
+            if (callback != null)
+                callback();
         }
 
         void InitComplete()
@@ -111,13 +125,12 @@ namespace Uzen.AB
 
         IEnumerator LoadDepInfo()
         {
-            _depInfoReader = new AssetBundleDataReader();
             string depFile = string.Format("{0}/{1}", pathResolver.BundleCacheDir, pathResolver.DependFileName);
 
             if (File.Exists(depFile))
             {
                 FileStream fs = new FileStream(depFile, FileMode.Open);
-                _depInfoReader.Read(fs);
+                Init(fs, null);
                 fs.Close();
             }
             else
@@ -128,8 +141,7 @@ namespace Uzen.AB
 
                 if (w.error == null)
                 {
-                    _depInfoReader.Read(new MemoryStream(w.bytes));
-
+                    Init(new MemoryStream(w.bytes), null);
                     File.WriteAllBytes(depFile, w.bytes);
                 }
                 else
