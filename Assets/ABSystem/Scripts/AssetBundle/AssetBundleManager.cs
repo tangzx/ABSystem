@@ -76,6 +76,8 @@ namespace Uzen.AB
             pathResolver = new AssetBundlePathResolver();
         }
 
+        public AssetBundleDataReader depInfoReader { get { return _depInfoReader; } }
+
         protected void Awake()
         {
 			InvokeRepeating("CheckUnusedBundle", 0, 5);

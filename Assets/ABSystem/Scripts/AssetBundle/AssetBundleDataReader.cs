@@ -12,7 +12,7 @@ public class AssetBundleData
     public AssetBundleData[] dependList;
 }
 
-class AssetBundleDataReader
+public class AssetBundleDataReader
 {
     public Dictionary<string, AssetBundleData> infoMap = new Dictionary<string, AssetBundleData>();
 
