@@ -7,6 +7,7 @@ public class AssetBundleData
     public string shortName;
     public string fullName;
     public string hash;
+    public AssetBundleExportType type;
     public string[] dependencies;
     public bool isAnalyzed;
     public AssetBundleData[] dependList;
@@ -29,11 +30,11 @@ public class AssetBundleDataReader
 
             name = name.ToLower();
 
-            //去除 .info
+            string shortFileName = sr.ReadLine().ToLower();
             string hash = sr.ReadLine();
+            int typeData = Convert.ToInt32(sr.ReadLine());
             int depsCount = Convert.ToInt32(sr.ReadLine());
             string[] deps = new string[depsCount];
-            string shortFileName = sr.ReadLine().ToLower();
 
             if (!shortName2FullName.ContainsKey(shortFileName))
                 shortName2FullName.Add(shortFileName, name);
@@ -47,7 +48,7 @@ public class AssetBundleDataReader
             info.fullName = name;
             info.shortName = shortFileName;
             info.dependencies = deps;
-
+            info.type = (AssetBundleExportType)typeData;
             infoMap[name.ToLower()] = info;
         }
         sr.Close();

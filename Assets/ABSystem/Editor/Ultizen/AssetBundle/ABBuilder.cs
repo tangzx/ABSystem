@@ -73,7 +73,7 @@ public class ABBuilder
             foreach (FileInfo file in prefabs)
             {
                 AssetTarget target = AssetBundleUtils.Load(file);
-                target.exportType = ExportType.Root;
+                target.exportType = AssetBundleExportType.Root;
             }
         }
     }

@@ -12,19 +12,6 @@ namespace Uzen.AB
         Builtin
     }
 
-    public enum ExportType
-    {
-        Asset = 0,
-        /// <summary>
-        /// 根
-        /// </summary>
-        Root = 1,
-        /// <summary>
-        /// 单独打包
-        /// </summary>
-        Standalone = 1 << 2
-    }
-
     public class AssetTarget : System.IComparable<AssetTarget>
     {
         /// <summary>
@@ -50,7 +37,7 @@ namespace Uzen.AB
         /// <summary>
         /// 导出类型
         /// </summary>
-        public ExportType exportType = ExportType.Asset;
+        public AssetBundleExportType exportType = AssetBundleExportType.Asset;
         /// <summary>
         /// 保存地址
         /// </summary>
@@ -186,8 +173,8 @@ namespace Uzen.AB
         {
             switch (this.exportType)
             {
-                case ExportType.Standalone:
-                case ExportType.Root:
+                case AssetBundleExportType.Standalone:
+                case AssetBundleExportType.Root:
                     rootSet.Add(this);
                     break;
                 default:
@@ -214,12 +201,12 @@ namespace Uzen.AB
                 item.BeforeExport();
             }
 
-            if (this.exportType == ExportType.Asset)
+            if (this.exportType == AssetBundleExportType.Asset)
             {
                 HashSet<AssetTarget> rootSet = new HashSet<AssetTarget>();
                 this.GetRoot(rootSet);
                 if (rootSet.Count > 1)
-                    this.exportType = ExportType.Standalone;
+                    this.exportType = AssetBundleExportType.Standalone;
             }
         }
 
@@ -350,7 +337,7 @@ namespace Uzen.AB
                 if (type == AssetType.Builtin)
                     return false;
 
-                bool v = exportType == ExportType.Root || exportType == ExportType.Standalone;
+                bool v = exportType == AssetBundleExportType.Root || exportType == AssetBundleExportType.Standalone;
 
                 return v;
             }

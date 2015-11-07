@@ -355,7 +355,7 @@ namespace Uzen.AB
                 abi = new AssetBundleInfo();
             abi.bundleName = loader.bundleName;
             abi.bundle = assetBundle;
-            abi.loader = loader;
+            abi.data = loader.bundleData;
 
             _loadedAssetBundle[loader.bundleName] = abi;
             return abi;

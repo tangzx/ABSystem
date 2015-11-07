@@ -19,13 +19,16 @@ public class AssetBundleDataWriter
             HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
             target.GetDependencies(deps);
 
+            //bundle name
             sw.WriteLine(target.bundleName);
-            //hash
-            sw.WriteLine(target.bundleCrc);
-            //写入依赖信息
-            sw.WriteLine(string.Format("{0}", deps.Count));
             //File Name
             sw.WriteLine(target.file.Name);
+            //hash
+            sw.WriteLine(target.bundleCrc);
+            //type
+            sw.WriteLine((int)target.exportType);
+            //写入依赖信息
+            sw.WriteLine(deps.Count);
 
             foreach (AssetTarget item in deps)
             {
