@@ -6,12 +6,15 @@ public class AssetBundleDataWriter
 {
     public void Save(string path, AssetTarget[] targets)
     {
-        Save(new FileStream(path, FileMode.CreateNew), targets);
+        FileStream fs = new FileStream(path, FileMode.CreateNew);
+        Save(fs, targets);
     }
 
     public virtual void Save(Stream stream, AssetTarget[] targets)
     {
         StreamWriter sw = new StreamWriter(stream);
+        //写入文件头判断文件类型用，ABDT 意思即 Asset-Bundle-Data-Text
+        sw.WriteLine("ABDT");
 
         for (int i = 0; i < targets.Length; i++)
         {
