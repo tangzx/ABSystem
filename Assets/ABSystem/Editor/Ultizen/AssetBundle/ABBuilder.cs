@@ -85,7 +85,7 @@ public class ABBuilder
         if (File.Exists(path))
             File.Delete(path);
 
-        AssetBundleDataWriter writer = new AssetBundleDataWriter();
+        AssetBundleDataWriter writer = new AssetBundleDataBinaryWriter();
         writer.Save(path, all.ToArray());
     }
 
