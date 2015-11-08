@@ -10,6 +10,22 @@ public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
         //写入文件头判断文件类型用，ABDB 意思即 Asset-Bundle-Data-Binary
         sw.Write(new char[] { 'A', 'B', 'D', 'B' });
 
+        List<string> bundleNames = new List<string>();
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            AssetTarget target = targets[i];
+            bundleNames.Add(target.bundleName);
+        }
+
+        //写入文件名池
+        sw.Write(bundleNames.Count);
+        for (int i = 0; i < bundleNames.Count; i++)
+        {
+            sw.Write(bundleNames[i]);
+        }
+
+        //写入详细信息
         for (int i = 0; i < targets.Length; i++)
         {
             AssetTarget target = targets[i];
@@ -17,7 +33,7 @@ public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
             target.GetDependencies(deps);
 
             //bundle name
-            sw.Write(target.bundleName);
+            sw.Write(bundleNames.IndexOf(target.bundleName));
             //File Name
             sw.Write(target.file.Name);
             //hash
@@ -29,7 +45,7 @@ public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
 
             foreach (AssetTarget item in deps)
             {
-                sw.Write(item.bundleName);
+                sw.Write(bundleNames.IndexOf(item.bundleName));
             }
         }
         sw.Close();

@@ -11,16 +11,20 @@ class AssetBundleDataBinaryReader : AssetBundleDataReader
         //读取文件头判断文件类型，ABDB 意思即 Asset-Bundle-Data-Binary
         if (fileHeadChars[0] != 'A' || fileHeadChars[1] != 'B' || fileHeadChars[2] != 'D' || fileHeadChars[3] != 'B')
             return;
+        
+        int namesCount = sr.ReadInt32();
+        string[] names = new string[namesCount];
+        for (int i = 0; i < namesCount; i++)
+        {
+            names[i] = sr.ReadString();
+        }
 
         while (true)
         {
             if (fs.Position == fs.Length)
                 break;
 
-            string name = sr.ReadString();
-            if (string.IsNullOrEmpty(name))
-                break;
-
+            string name = names[sr.ReadInt32()];
             string shortFileName = sr.ReadString();
             string hash = sr.ReadString();
             int typeData = sr.ReadInt32();
@@ -31,7 +35,7 @@ class AssetBundleDataBinaryReader : AssetBundleDataReader
                 shortName2FullName.Add(shortFileName, name);
             for (int i = 0; i < depsCount; i++)
             {
-                deps[i] = sr.ReadString();
+                deps[i] = names[sr.ReadInt32()];
             }
 
             AssetBundleData info = new AssetBundleData();
