@@ -85,8 +85,15 @@ public class ABBuilder
         if (File.Exists(path))
             File.Delete(path);
 
+        List<AssetTarget> exportList = new List<AssetTarget>();
+        for (int i = 0; i < all.Count; i++)
+        {
+            AssetTarget target = all[i];
+            if (target.needSelfExport)
+                exportList.Add(target);
+        }
         AssetBundleDataWriter writer = new AssetBundleDataBinaryWriter();
-        writer.Save(path, all.ToArray());
+        writer.Save(path, exportList.ToArray());
     }
 
     /// <summary>
