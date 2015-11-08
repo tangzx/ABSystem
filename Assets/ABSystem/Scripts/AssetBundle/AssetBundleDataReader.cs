@@ -7,7 +7,7 @@ public class AssetBundleData
     public string shortName;
     public string fullName;
     public string hash;
-    public AssetBundleExportType type;
+    public AssetBundleExportType compositeType;
     public string[] dependencies;
     public bool isAnalyzed;
     public AssetBundleData[] dependList;
@@ -52,7 +52,7 @@ public class AssetBundleDataReader
             info.fullName = name;
             info.shortName = shortFileName;
             info.dependencies = deps;
-            info.type = (AssetBundleExportType)typeData;
+            info.compositeType = (AssetBundleExportType)typeData;
             infoMap[name] = info;
         }
         sr.Close();

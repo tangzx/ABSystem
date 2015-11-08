@@ -39,7 +39,7 @@ class AssetBundleDataBinaryReader : AssetBundleDataReader
             info.fullName = name;
             info.shortName = shortFileName;
             info.dependencies = deps;
-            info.type = (AssetBundleExportType)typeData;
+            info.compositeType = (AssetBundleExportType)typeData;
             infoMap[name] = info;
         }
         sr.Close();

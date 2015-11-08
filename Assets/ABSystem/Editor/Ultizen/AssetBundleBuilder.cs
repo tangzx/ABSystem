@@ -13,7 +13,7 @@ public class AssetBundleBuilder
 #endif
         builder.Begin();
 
-        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab" });
+        builder.AddRootTargets(new DirectoryInfo("Assets/Prefabs"), new string[] { "*.prefab", "*.png" });
 
         builder.Export();
         builder.End();

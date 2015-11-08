@@ -190,7 +190,7 @@ public class AssetBundleInfo
                 _mainObject = bundle.mainAsset;
 #endif
                 //优化：如果是根，则可以 unload(false) 以节省内存
-                if (data.type == AssetBundleExportType.Root)
+                if (data.compositeType == AssetBundleExportType.Root)
                     UnloadBundle();
 
                 if (_mainObject is GameObject)
@@ -208,7 +208,7 @@ public class AssetBundleInfo
     {
         if (bundle != null)
         {
-            Debug.Log("Unload : " + data.type + " >> " + bundleName);
+            Debug.Log("Unload : " + data.compositeType + " >> " + bundleName);
 
             bundle.Unload(false);
         }

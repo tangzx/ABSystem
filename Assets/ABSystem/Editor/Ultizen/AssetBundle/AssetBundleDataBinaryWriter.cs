@@ -23,7 +23,7 @@ public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
             //hash
             sw.Write(target.bundleCrc);
             //type
-            sw.Write((int)target.exportType);
+            sw.Write((int)target.compositeType);
             //写入依赖信息
             sw.Write(deps.Count);
 

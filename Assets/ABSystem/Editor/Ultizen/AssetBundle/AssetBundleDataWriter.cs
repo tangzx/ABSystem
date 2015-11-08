@@ -29,7 +29,7 @@ public class AssetBundleDataWriter
             //hash
             sw.WriteLine(target.bundleCrc);
             //type
-            sw.WriteLine((int)target.exportType);
+            sw.WriteLine((int)target.compositeType);
             //写入依赖信息
             sw.WriteLine(deps.Count);
 

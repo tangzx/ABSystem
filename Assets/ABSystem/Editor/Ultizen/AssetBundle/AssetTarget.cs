@@ -275,6 +275,17 @@ namespace Uzen.AB
             get { return new List<AssetTarget>(_dependencies); }
         }
 
+        public AssetBundleExportType compositeType
+        {
+            get
+            {
+                AssetBundleExportType type = exportType;
+                if (type == AssetBundleExportType.Root && _dependsChildren.Count > 0)
+                    type |= AssetBundleExportType.Asset;
+                return type;
+            }
+        }
+
         public bool isNewBuild
         {
             get { return _isNewBuild; }
