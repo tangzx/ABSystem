@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Uzen.AB
 {
@@ -58,6 +59,8 @@ namespace Uzen.AB
         private bool _isDepTreeChanged = false;
         //上次打包的信息（用于增量打包）
         private AssetCacheInfo _cacheInfo;
+        //.meta 文件的Hash
+        private string _metaHash;
         //上次打好的AB的CRC值（用于增量打包）
         private string _bundleCrc;
         //是否是新打包的
@@ -80,8 +83,40 @@ namespace Uzen.AB
             this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
 
             _isFileChanged = true;
+            _metaHash = "0";
         }
 
+        /// <summary>
+        /// Texture
+        /// AudioClip
+        /// Mesh
+        /// Model
+        /// Shader
+        /// 这些类型的Asset的一配置是放在.meta中的，所以要监视它们的变化
+        /// 而在5x中系统会自己处理的，不用管啦
+        /// </summary>
+        void LoadMetaHashIfNecessary()
+        {
+            bool needLoad = false;
+            if (typeof(Texture).IsInstanceOfType(asset) ||
+                typeof(AudioClip).IsInstanceOfType(asset) ||
+                typeof(Mesh).IsInstanceOfType(asset) ||
+                typeof(Shader).IsInstanceOfType(asset) )
+            {
+                needLoad = true;
+            }
+
+            if (!needLoad)
+            {
+                AssetImporter importer = AssetImporter.GetAtPath(assetPath);
+                needLoad = typeof(ModelImporter).IsInstanceOfType(importer);
+            }
+
+            if (needLoad)
+            {
+                _metaHash = AssetBundleUtils.GetFileHash(assetPath + ".meta");
+            }
+        }
 
         /// <summary>
         /// 分析引用关系
@@ -91,8 +126,11 @@ namespace Uzen.AB
             if (_isAnalyzed) return;
             _isAnalyzed = true;
 
+#if !UNITY_5
+            LoadMetaHashIfNecessary();
+#endif
             _cacheInfo = AssetBundleUtils.GetCacheInfo(assetPath);
-            _isFileChanged = _cacheInfo == null || !_cacheInfo.fileHash.Equals(GetHash());
+            _isFileChanged = _cacheInfo == null || !_cacheInfo.fileHash.Equals(GetHash()) || !_cacheInfo.metaHash.Equals(_metaHash);
             if (_cacheInfo != null)
             {
                 _bundleCrc = _cacheInfo.bundleCrc;
@@ -538,6 +576,7 @@ namespace Uzen.AB
         {
             sw.WriteLine(this.assetPath);
             sw.WriteLine(GetHash());
+            sw.WriteLine(_metaHash);
             sw.WriteLine(this._bundleCrc);
             HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
             this.GetDependencies(deps);
