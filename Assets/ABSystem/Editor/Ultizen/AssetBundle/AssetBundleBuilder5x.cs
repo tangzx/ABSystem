@@ -50,7 +50,7 @@ public class AssetBundleBuilder5x : ABBuilder
                 importer.assetBundleName = null;
         }
         SaveDepAll(all);
-        RemoveU5XAssetBundleManifests();
+        //RemoveU5XAssetBundleManifests();
         //this.RemoveUnused(all);
     }
 
