@@ -7,7 +7,15 @@
 /Assets/AssetBundles/cache.txt.meta
 /Assets/StreamingAssets/AssetBundles
 /Assets/StreamingAssets/AssetBundles.meta
+/ProjectSettings/ProjectVersion.txt
+/ProjectSettings/UnityAdsSettings.asset
+/ProjectSettings/NavMeshAreas.asset
+/ProjectSettings/UnityAnalyticsManager.asset
 
+.vs
+
+*.userprefs
+*.unityproj
 *.csproj
 *.sln
 *.suo
