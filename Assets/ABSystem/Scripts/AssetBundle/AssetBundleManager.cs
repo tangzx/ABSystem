@@ -129,7 +129,7 @@ namespace Uzen.AB
 
             if (File.Exists(depFile))
             {
-                FileStream fs = new FileStream(depFile, FileMode.Open);
+                FileStream fs = new FileStream(depFile, FileMode.Open, FileAccess.Read);
                 Init(fs, null);
                 fs.Close();
             }
