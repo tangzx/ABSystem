@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
-using UnityEditor;
 using Uzen.AB;
 
 public class Test : MonoBehaviour
 {
     AssetBundleManager manager;
-    // Use this for initialization
-
-    public Renderer renderer;
 
     void Start()
     {
@@ -42,23 +38,11 @@ public class Test : MonoBehaviour
         //});
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetMouseButtonUp(0))
-        {
-            //manager.Load("Assets.Prefabs.Cube.prefab.ab", (a) =>
-            //{
-            //    GameObject go = a.Instantiate();
-            //    go.transform.localPosition = new Vector3(6, 3, 3);
-            //});
-        }
-    }
-
     void OnGUI()
     {
         if (GUI.Button(new Rect(0,0, 100, 100), "GC"))
         {
+            manager.UnloadUnusedBundle();
             Resources.UnloadUnusedAssets();
             System.GC.Collect();
         }
