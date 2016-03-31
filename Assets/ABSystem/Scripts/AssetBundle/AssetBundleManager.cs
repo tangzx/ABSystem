@@ -170,8 +170,11 @@ namespace Uzen.AB
         public AssetBundleLoader Load(string path, LoadAssetCompleteHandler handler = null)
         {
             AssetBundleLoader loader = this.CreateLoader(path);
-            
-            if (loader.isComplete)
+            if (loader == null)
+            {
+                handler(null);
+            }
+            else if (loader.isComplete)
             {
                 if (handler != null)
                     handler(loader.bundleInfo);
@@ -201,12 +204,18 @@ namespace Uzen.AB
             }
             else
             {
+#if !AB_MODE && UNITY_EDITOR
                 loader = this.CreateLoader();
                 loader.bundleManager = this;
-#if !AB_MODE && UNITY_EDITOR
                 loader.bundleName = path;
 #else
                 AssetBundleData data = _depInfoReader.GetAssetBundleInfo(path);
+                if (data == null)
+                {
+                    return null;
+                }
+                loader = this.CreateLoader();
+                loader.bundleManager = this;
                 loader.bundleData = data;
                 loader.bundleName = data.fullName;
 #endif
