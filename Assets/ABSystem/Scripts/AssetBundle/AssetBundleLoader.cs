@@ -144,8 +144,11 @@ namespace Uzen.AB
         {
             if (state != LoadState.State_Error)
             {
-                _bundle = AssetBundle.LoadFromFile(_assetBundleCachedFile);
-                yield return null;
+                AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleCachedFile);
+                yield return req;
+                _bundle = req.assetBundle;
+                //_bundle = AssetBundle.LoadFromFile(_assetBundleCachedFile);
+                //yield return null;
 
                 this.Complete();
             }

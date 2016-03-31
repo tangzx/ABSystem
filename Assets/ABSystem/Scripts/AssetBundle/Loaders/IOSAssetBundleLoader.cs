@@ -11,8 +11,12 @@ public class IOSAssetBundleLoader : MobileAssetBundleLoader
 {
     protected override IEnumerator LoadFromBuiltin()
     {
-        _bundle = AssetBundle.LoadFromFile(_assetBundleSourceFile);
-        yield return null;
+        AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleSourceFile);
+        yield return req;
+        _bundle = req.assetBundle;
+
+        //_bundle = AssetBundle.LoadFromFile(_assetBundleSourceFile);
+        //yield return null;
 
         this.Complete();
     }
