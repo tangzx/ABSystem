@@ -5,7 +5,7 @@ using Uzen.AB;
 
 public class ABBuilder
 {
-
+	protected AssetBundleDataWriter dataWriter = new AssetBundleDataBinaryWriter();
     protected AssetBundlePathResolver pathResolver;
 
     public ABBuilder() : this(new AssetBundlePathResolver())
@@ -92,9 +92,14 @@ public class ABBuilder
             if (target.needSelfExport)
                 exportList.Add(target);
         }
-        AssetBundleDataWriter writer = new AssetBundleDataBinaryWriter();
+		AssetBundleDataWriter writer = dataWriter;
         writer.Save(path, exportList.ToArray());
     }
+
+	public void SetDataWriter(AssetBundleDataWriter w)
+	{
+		this.dataWriter = w;
+	}
 
     /// <summary>
     /// 删除未使用的AB，可能是上次打包出来的，而这一次没生成的
