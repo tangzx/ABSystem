@@ -489,7 +489,8 @@ namespace Uzen.AB
             target._dependsChildren.Remove(this);
 
             //recursive
-            var e = _dependsChildren.GetEnumerator();
+			var dcc = new HashSet<AssetTarget>(_dependsChildren);
+            var e = dcc.GetEnumerator();
             while (e.MoveNext())
             {
                 AssetTarget dc = e.Current;
