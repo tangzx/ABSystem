@@ -1,5 +1,4 @@
 ﻿#if UNITY_5
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Uzen.AB;
@@ -36,8 +35,10 @@ public class AssetBundleBuilder5x : ABBuilder
         }
 
         //开始打包
-        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(pathResolver.BundleSavePath, BuildAssetBundleOptions.UncompressedAssetBundle, EditorUserBuildSettings.activeBuildTarget);
-        
+        AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(this.pathResolver.BundleSavePath, BuildAssetBundleOptions.UncompressedAssetBundle, EditorUserBuildSettings.activeBuildTarget);
+
+		AssetBundle ab = AssetBundle.LoadFromFile (pathResolver.BundleSavePath + "/AssetBundles");
+		manifest = ab.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
         //清除所有 asset bundle name
         for (int i = 0; i < all.Count; i++)
         {
@@ -49,20 +50,9 @@ public class AssetBundleBuilder5x : ABBuilder
             if (importer)
                 importer.assetBundleName = null;
         }
-        SaveDepAll(all);
-        //RemoveU5XAssetBundleManifests();
+		this.SaveDepAll(all);
+		ab.Unload (true);
         //this.RemoveUnused(all);
-    }
-
-    void RemoveU5XAssetBundleManifests()
-    {
-        DirectoryInfo dir = new DirectoryInfo(pathResolver.BundleSavePath);
-        FileInfo[] manifestFiles = dir.GetFiles("*.manifest");
-        for (int i = 0; i < manifestFiles.Length; i++)
-        {
-            manifestFiles[i].Delete();
-        }
-        File.Delete(Path.Combine(pathResolver.BundleSavePath, "AssetBundles"));
     }
 }
 #endif
