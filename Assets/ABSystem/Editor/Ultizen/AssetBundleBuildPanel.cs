@@ -117,15 +117,36 @@ public class AssetBundleBuildPanel : EditorWindow
             {
                 filter.valid = GUILayout.Toggle(filter.valid, "valid", GUILayout.ExpandWidth(false));
                 filter.path = GUILayout.TextField(filter.path, GUILayout.ExpandWidth(true));
+                if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
+                {
+                    string dataPath = Application.dataPath;
+                    string selectedPath = EditorUtility.OpenFolderPanel("Path", dataPath, "");
+                    if (!string.IsNullOrEmpty(selectedPath))
+                    {
+                        if (selectedPath.StartsWith(dataPath))
+                        {
+                            filter.path = "Assets/" + selectedPath.Substring(dataPath.Length + 1);
+                        }
+                        else
+                        {
+                            ShowNotification(new GUIContent("不能在Assets目录之外!"));
+                        }
+                    }
+                }
                 filter.filter = GUILayout.TextField(filter.filter, GUILayout.Width(200));
                 if (GUILayout.Button("X", GUILayout.ExpandWidth(false)))
                 {
-
+                    config.filters.RemoveAt(i);
+                    i--;
                 }
             }
             GUILayout.EndHorizontal();
         }
         GUILayout.EndVertical();
+
+        //set dirty
+        if (GUI.changed)
+            EditorUtility.SetDirty(config);
     }
 
     private void Build()
