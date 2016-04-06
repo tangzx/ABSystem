@@ -97,6 +97,7 @@ public class AssetBundleInfo
             if (mainObject is GameObject)
             {
                 Object inst = Object.Instantiate(mainObject);
+                inst.name = mainObject.name;
                 //这里去掉，用Tracker进行跟踪了
                 //this.Retain(inst);
                 return (GameObject)inst;
