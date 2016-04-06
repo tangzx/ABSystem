@@ -5,10 +5,11 @@
 * 可扩展，自定义打包和加载路径
 
 # 如何运行
-1. 在`ABSystem/Editor/Ultizen/AssetBundleBuilder.cs`中更改打包配置
-2. 执行菜单 `Tang / Build AssetBundles` 打包
-3. 增加宏 `AB_MODE`
-4. 运行测试
+1. 通过`ABSystem/Builder Panel`打开配置界面
+2. 在配置界面中更改打包配置
+3. 点击`Build`执行打包
+4. 增加宏 `AB_MODE`
+5. 运行测试
 
 # 如何使用
 ```c#
