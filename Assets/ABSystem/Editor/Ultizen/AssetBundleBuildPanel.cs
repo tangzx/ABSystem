@@ -4,13 +4,12 @@ using UnityEngine;
 
 public class AssetBundleBuildPanel : EditorWindow
 {
-    [MenuItem("Tang/AssetBundleConfigPanel")]
+    [MenuItem("ABSystem/Builder Panel")]
     static void Open()
     {
-        GetWindow<AssetBundleBuildPanel>();
+        AssetBundleBuildPanel panel = GetWindow<AssetBundleBuildPanel>("ABSystem", true);
     }
-
-    [MenuItem("Tang/Build AssetBundles")]
+    
     static void BuildAssetBundles()
     {
         AssetBundleBuildConfig config = AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
@@ -68,6 +67,7 @@ public class AssetBundleBuildPanel : EditorWindow
 
     void OnGUI()
     {
+		bool execBuild = false;
         if (config == null)
         {
             config = AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
@@ -92,7 +92,7 @@ public class AssetBundleBuildPanel : EditorWindow
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Build", Styles.toolbarButton))
             {
-                Build();
+				execBuild = true;
             }
         }
         GUILayout.EndHorizontal();
@@ -115,7 +115,7 @@ public class AssetBundleBuildPanel : EditorWindow
             AssetBundleFilter filter = config.filters[i];
             GUILayout.BeginHorizontal();
             {
-                filter.valid = GUILayout.Toggle(filter.valid, "valid", GUILayout.ExpandWidth(false));
+                filter.valid = GUILayout.Toggle(filter.valid, "", GUILayout.ExpandWidth(false));
                 filter.path = GUILayout.TextField(filter.path, GUILayout.ExpandWidth(true));
                 if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
                 {
@@ -147,6 +147,9 @@ public class AssetBundleBuildPanel : EditorWindow
         //set dirty
         if (GUI.changed)
             EditorUtility.SetDirty(config);
+
+		if (execBuild)
+			Build();
     }
 
     private void Build()
