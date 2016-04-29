@@ -144,11 +144,15 @@ namespace Uzen.AB
         {
             if (state != LoadState.State_Error)
             {
+#if UNITY_5_3 || UNITY_5_4
                 AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleCachedFile);
                 yield return req;
                 _bundle = req.assetBundle;
-                //_bundle = AssetBundle.LoadFromFile(_assetBundleCachedFile);
-                //yield return null;
+#else
+
+                _bundle = AssetBundle.CreateFromFile(_assetBundleCachedFile);
+                yield return null;
+#endif
 
                 this.Complete();
             }
