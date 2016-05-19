@@ -246,6 +246,13 @@ namespace Uzen.AB
                 if (rootSet.Count > 1)
                     this.exportType = AssetBundleExportType.Standalone;
             }
+
+            //不是根素材的以GUID命名，防止路径过长，在安卓上有问题
+            if ((this.exportType & AssetBundleExportType.Root) != AssetBundleExportType.Root)
+            {
+				this.bundleName = AssetBundleUtils.ConvertToABName("_" + AssetDatabase.AssetPathToGUID(assetPath));
+				this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
+            }
         }
 
         /// <summary>
