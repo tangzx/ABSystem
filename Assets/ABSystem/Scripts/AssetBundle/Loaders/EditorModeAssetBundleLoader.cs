@@ -29,14 +29,21 @@ public class EditorModeAssetBundleLoader : AssetBundleLoader
             this.state = LoadState.State_Complete;
             this.bundleInfo = bundleManager.CreateBundleInfo(this, new ABInfo());
             this.bundleInfo.isReady = true;
+            this.bundleInfo.onUnloaded = OnBundleUnload;
         }
 
         bundleManager.StartCoroutine(this.LoadResource());
     }
 
+    private void OnBundleUnload(AssetBundleInfo abi)
+    {
+        this.bundleInfo = null;
+        this.state = LoadState.State_None;
+    }
+
     IEnumerator LoadResource()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForEndOfFrame();
         this.Complete();
     }
 }
