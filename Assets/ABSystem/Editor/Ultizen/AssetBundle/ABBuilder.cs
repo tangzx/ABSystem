@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 using UnityEditor;
 using Uzen.AB;
 
@@ -122,7 +123,11 @@ public class ABBuilder
             FileInfo fi = abFiles[i];
             if (usedSet.Add(fi.Name))
             {
+				Debug.Log("Remove unused AB : " + fi.Name);
+
                 fi.Delete();
+				//for U5X
+				File.Delete(fi.FullName + ".manifest");
             }
         }
     }

@@ -56,7 +56,7 @@ public class AssetBundleBuilder5x : ABBuilder
         }
 		this.SaveDepAll(all);
 		ab.Unload (true);
-        //this.RemoveUnused(all);
+        this.RemoveUnused(all);
 
         AssetDatabase.Refresh();
     }
