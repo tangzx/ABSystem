@@ -41,6 +41,7 @@ public class AssetBundleBuilder4x : ABBuilder
             this.Export(tree, 0);
             this.SaveDepAll(all);
             this.RemoveUnused(all);
+            AssetDatabase.Refresh();
         }
         catch(Exception e)
         {
