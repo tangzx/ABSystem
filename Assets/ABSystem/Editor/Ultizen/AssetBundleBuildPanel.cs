@@ -9,7 +9,8 @@ public class AssetBundleBuildPanel : EditorWindow
     {
         AssetBundleBuildPanel panel = GetWindow<AssetBundleBuildPanel>("ABSystem", true);
     }
-    
+
+    [MenuItem("ABSystem/Builde AssetBundles")]
     static void BuildAssetBundles()
     {
         AssetBundleBuildConfig config = AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
