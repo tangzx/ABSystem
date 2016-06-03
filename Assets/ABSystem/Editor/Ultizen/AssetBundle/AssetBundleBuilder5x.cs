@@ -35,7 +35,7 @@ public class AssetBundleBuilder5x : ABBuilder
         }
 
         //开始打包
-        BuildPipeline.BuildAssetBundles(this.pathResolver.BundleSavePath, BuildAssetBundleOptions.UncompressedAssetBundle, EditorUserBuildSettings.activeBuildTarget);
+        BuildPipeline.BuildAssetBundles(this.pathResolver.BundleSavePath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
 
 #if UNITY_5_3 || UNITY_5_4
         AssetBundle ab = AssetBundle.LoadFromFile (pathResolver.BundleSavePath + "/AssetBundles");
