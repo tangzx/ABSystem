@@ -25,12 +25,12 @@ void Start()
 
 void LoadObjects()
 {
-    manager.Load("Assets.Prefabs.Sphere.prefab.ab", (a) =>
+    manager.Load("Assets.Prefabs.Sphere.prefab", (a) =>
     {
         GameObject go = a.Instantiate(); //自动管理：当go被Destroy时，AB会被释放回收
     });
 
-    manager.Load("Assets.my_txture.png.ab", (a) =>
+    manager.Load("Assets.my_txture.png", (a) =>
     {
     	// a.Retain();	//强制引用计数加一
     	// a.Release();	//引用计数减一

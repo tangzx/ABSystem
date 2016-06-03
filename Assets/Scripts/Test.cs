@@ -16,7 +16,7 @@ public class Test : MonoBehaviour
 
     void LoadObjects()
     {
-        manager.Load("Assets.Prefabs.Sphere.prefab.ab", (a) =>
+        manager.Load("Assets.Prefabs.Sphere.prefab", (a) =>
         {
             GameObject go = Instantiate(a.mainObject) as GameObject;//a.Instantiate();
             go.transform.localPosition = new Vector3(3, 3, 3);
@@ -36,15 +36,5 @@ public class Test : MonoBehaviour
         //    GameObject go = a.Instantiate();
         //    go.transform.localPosition = new Vector3(12, 3, 3);
         //});
-    }
-
-    void OnGUI()
-    {
-        if (GUI.Button(new Rect(0,0, 100, 100), "GC"))
-        {
-            manager.UnloadUnusedBundle();
-            Resources.UnloadUnusedAssets();
-            System.GC.Collect();
-        }
     }
 }
