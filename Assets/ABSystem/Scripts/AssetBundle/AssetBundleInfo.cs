@@ -14,10 +14,27 @@ public class AssetBundleInfo
     public string bundleName;
     public AssetBundleData data;
 
+    /// <summary>
+    /// 如果没有其它东西引用的情况下，此AB最小生存时间（单位秒）
+    /// 否则有可能刚加载完成就被释放了
+    /// </summary>
+    public float minLifeTime = 5;
+
+    /// <summary>
+    /// 准备完毕时的时间
+    /// </summary>
+    private float _readyTime;
+
+    /// <summary>
+    /// 标记当前是否准备完毕
+    /// </summary>
     private bool _isReady;
 
     private Object _mainObject;
 
+    /// <summary>
+    /// 强制的引用计数
+    /// </summary>
     [SerializeField]
     public int refCount { get; private set; }
 
@@ -39,11 +56,25 @@ public class AssetBundleInfo
         }
     }
 
+    public void ResetLifeTime()
+    {
+        if (_isReady)
+        {
+            _readyTime = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// 引用计数增一
+    /// </summary>
     public void Retain()
     {
         refCount++;
     }
 
+    /// <summary>
+    /// 引用计数减一
+    /// </summary>
     public void Release()
     {
         refCount--;
@@ -60,7 +91,7 @@ public class AssetBundleInfo
 
         for (int i = 0; i < references.Count; i++)
         {
-            if (references[i].Target == owner)
+            if (owner.Equals(references[i].Target))
                 return;
         }
 
@@ -91,15 +122,39 @@ public class AssetBundleInfo
     /// <returns></returns>
     public virtual GameObject Instantiate()
     {
+        return Instantiate(true);
+    }
+
+    public virtual GameObject Instantiate(bool enable)
+    {
         if (mainObject != null)
         {
             //只有GameObject才可以Instantiate
             if (mainObject is GameObject)
             {
-                Object inst = Object.Instantiate(mainObject);
-                inst.name = mainObject.name;
-                //这里去掉，用Tracker进行跟踪了
-                //this.Retain(inst);
+                GameObject prefab = mainObject as GameObject;
+                prefab.SetActive(enable);
+                Object inst = Object.Instantiate(prefab);
+                inst.name = prefab.name;
+                Retain(inst);
+                return (GameObject)inst;
+            }
+        }
+        return null;
+    }
+
+    public virtual GameObject Instantiate(Vector3 position, Quaternion rotation, bool enable = true)
+    {
+        if (mainObject != null)
+        {
+            //只有GameObject才可以Instantiate
+            if (mainObject is GameObject)
+            {
+                GameObject prefab = mainObject as GameObject;
+                prefab.SetActive(enable);
+                Object inst = Object.Instantiate(prefab, position, rotation);
+                inst.name = prefab.name;
+                Retain(inst);
                 return (GameObject)inst;
             }
         }
@@ -151,7 +206,7 @@ public class AssetBundleInfo
     /// <returns></returns>
     public bool isUnused
     {
-        get { return _isReady && refCount <= 0 && this.UpdateReference() == 0; }
+        get { return _isReady && refCount <= 0 && UpdateReference() == 0 && Time.time - _readyTime > minLifeTime; }
     }
 
     public virtual void Dispose()
@@ -193,13 +248,13 @@ public class AssetBundleInfo
                 //优化：如果是根，则可以 unload(false) 以节省内存
                 if (data.compositeType == AssetBundleExportType.Root)
                     UnloadBundle();
-
+                /*
                 if (_mainObject is GameObject)
                 {
                     GameObject go = (GameObject)_mainObject;
                     GameObjectTracker tracker = go.AddComponent<GameObjectTracker>();
                     tracker.bundleName = this.bundleName;
-                }
+                }*/
             }
             return _mainObject;
         }

@@ -35,14 +35,13 @@ public class AssetBundlePathResolver
     public virtual string GetEditorModePath(string abName)
     {
         //将 Assets.AA.BB.prefab 转为 Assets/AA/BB.prefab
-        string p = abName.Substring(0, abName.Length - 3);//去除最后的 .ab
-        p = p.Replace(".", "/");
-        int last = p.LastIndexOf("/");
+        abName = abName.Replace(".", "/");
+        int last = abName.LastIndexOf("/");
         
         if (last == -1)
-            return p;
+            return abName;
 
-        string path = string.Format("{0}.{1}", p.Substring(0, last), p.Substring(last + 1));
+        string path = string.Format("{0}.{1}", abName.Substring(0, last), abName.Substring(last + 1));
         return path;
     }
 #endif
@@ -76,5 +75,5 @@ public class AssetBundlePathResolver
     /// <summary>
     /// 运行时AB缓存的路径
     /// </summary>
-    public virtual string BundleCacheDir { get { return BundleSavePath; } }
+	public virtual string BundleCacheDir { get { return string.Format("{0}/AssetBundles", Application.streamingAssetsPath); } }
 }

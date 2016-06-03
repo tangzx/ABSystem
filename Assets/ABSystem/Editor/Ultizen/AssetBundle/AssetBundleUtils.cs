@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -213,12 +211,12 @@ namespace Uzen.AB
         public static string ConvertToABName(string assetPath)
         {
             string bn = assetPath
-                .Replace(AssetBundleUtils.AssetPath, "")
+                .Replace(AssetPath, "")
                 .Replace('\\', '.')
                 .Replace('/', '.')
                 .Replace(" ", "_")
                 .ToLower();
-            return bn + ".ab";
+            return bn;
         }
 
         public static string GetFileHash(string path, bool force = false)
@@ -234,13 +232,12 @@ namespace Uzen.AB
             }
             else
             {
-                HashAlgorithm ha = HashAlgorithm.Create();
                 FileStream fs = new FileStream(path,
                     FileMode.Open,
                     FileAccess.Read,
                     FileShare.Read);
-                byte[] bytes = ha.ComputeHash(fs);
-                _hexStr = ToHexString(bytes);
+
+                _hexStr = HashUtil.Get(fs);
                 _fileHashCache[path] = _hexStr;
                 fs.Close();
             }
@@ -253,22 +250,6 @@ namespace Uzen.AB
             if (_fileHashOld.ContainsKey(path))
                 return _fileHashOld[path];
             return null;
-        }
-
-        public static string ToHexString(byte[] bytes)
-        {
-            string hexString = string.Empty;
-            if (bytes != null)
-            {
-                StringBuilder strB = new StringBuilder();
-
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    strB.Append(bytes[i].ToString("X2"));
-                }
-                hexString = strB.ToString();
-            }
-            return hexString;
         }
     }
 }

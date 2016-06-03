@@ -35,7 +35,7 @@ public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
             //bundle name
             sw.Write(bundleNames.IndexOf(target.bundleName));
             //File Name
-            sw.Write(target.file.Name);
+            sw.Write(target.bundleShortName);
             //hash
             sw.Write(target.bundleCrc);
             //type

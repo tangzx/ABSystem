@@ -25,7 +25,7 @@ public class AssetBundleDataWriter
             //bundle name
             sw.WriteLine(target.bundleName);
             //File Name
-            sw.WriteLine(target.file.Name);
+            sw.WriteLine(target.bundleShortName);
             //hash
             sw.WriteLine(target.bundleCrc);
             //type

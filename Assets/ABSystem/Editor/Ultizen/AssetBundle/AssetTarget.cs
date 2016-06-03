@@ -47,6 +47,10 @@ namespace Uzen.AB
         /// BundleName
         /// </summary>
         public string bundleName;
+        /// <summary>
+        /// 短名
+        /// </summary>
+        public string bundleShortName;
 
         public int level = -1;
         public List<AssetTarget> levelList;
@@ -79,7 +83,10 @@ namespace Uzen.AB
             this.asset = o;
             this.file = file;
             this.assetPath = assetPath;
-            this.bundleName = AssetBundleUtils.ConvertToABName(assetPath);
+            //this.bundleName = AssetBundleUtils.ConvertToABName(assetPath);
+            //this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
+            this.bundleShortName = file.Name.ToLower();
+            this.bundleName = HashUtil.Get(AssetBundleUtils.ConvertToABName(assetPath)) + ".ab";
             this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
 
             _isFileChanged = true;
@@ -245,13 +252,6 @@ namespace Uzen.AB
                 this.GetRoot(rootSet);
                 if (rootSet.Count > 1)
                     this.exportType = AssetBundleExportType.Standalone;
-            }
-
-            //不是根素材的以GUID命名，防止路径过长，在安卓上有问题
-            if ((this.exportType & AssetBundleExportType.Root) != AssetBundleExportType.Root)
-            {
-				this.bundleName = AssetBundleUtils.ConvertToABName("_" + AssetDatabase.AssetPathToGUID(assetPath));
-				this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
             }
         }
 

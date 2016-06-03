@@ -46,6 +46,10 @@ namespace Uzen.AB
         /// </summary>
         private HashSet<AssetBundleLoader> _nonCompleteLoaderSet = new HashSet<AssetBundleLoader>();
         /// <summary>
+        /// 此时加载的所有Loader记录，(用于在全加载完成之后设置 minLifeTime)
+        /// </summary>
+        private HashSet<AssetBundleLoader> _thisTimeLoaderSet = new HashSet<AssetBundleLoader>();
+        /// <summary>
         /// 已加载完成的缓存列表
         /// </summary>
         private Dictionary<string, AssetBundleInfo> _loadedAssetBundle = new Dictionary<string, AssetBundleInfo>();
@@ -169,57 +173,68 @@ namespace Uzen.AB
 
         public AssetBundleLoader Load(string path, LoadAssetCompleteHandler handler = null)
         {
+#if !AB_MODE && UNITY_EDITOR
             AssetBundleLoader loader = this.CreateLoader(path);
+#else
+            AssetBundleLoader loader = this.CreateLoader(HashUtil.Get(path.ToLower()) + ".ab", path);
+#endif
             if (loader == null)
             {
                 handler(null);
             }
-            else if (loader.isComplete)
-            {
-                if (handler != null)
-                    handler(loader.bundleInfo);
-            }
             else
             {
-                if (handler != null)
-                    loader.onComplete += handler;
-                _isCurrentLoading = true;
+                _thisTimeLoaderSet.Add(loader);
+                if (loader.isComplete)
+                {
+                    if (handler != null)
+                        handler(loader.bundleInfo);
+                }
+                else
+                {
+                    if (handler != null)
+                        loader.onComplete += handler;
+                    _isCurrentLoading = true;
 
-                if (loader.state < LoadState.State_Loading)
-                    _nonCompleteLoaderSet.Add(loader);
-                this.StartLoad();
+                    if (loader.state < LoadState.State_Loading)
+                        _nonCompleteLoaderSet.Add(loader);
+                    this.StartLoad();
+                }
             }
             return loader;
         }
 
-        internal AssetBundleLoader CreateLoader(string path)
+        internal AssetBundleLoader CreateLoader(string abFileName, string oriName = null)
         {
-            path = path.ToLower();
-
             AssetBundleLoader loader = null;
 
-            if (_loaderCache.ContainsKey(path))
+            if (_loaderCache.ContainsKey(abFileName))
             {
-                loader = _loaderCache[path];
+                loader = _loaderCache[abFileName];
             }
             else
             {
 #if !AB_MODE && UNITY_EDITOR
                 loader = this.CreateLoader();
                 loader.bundleManager = this;
-                loader.bundleName = path;
+                loader.bundleName = abFileName;
 #else
-                AssetBundleData data = _depInfoReader.GetAssetBundleInfo(path);
+                AssetBundleData data = _depInfoReader.GetAssetBundleInfo(abFileName);
+                if (data == null && oriName != null)
+                {
+                    data = _depInfoReader.GetAssetBundleInfoByShortName(oriName.ToLower());
+                }
                 if (data == null)
                 {
                     return null;
                 }
+
                 loader = this.CreateLoader();
                 loader.bundleManager = this;
                 loader.bundleData = data;
                 loader.bundleName = data.fullName;
 #endif
-                _loaderCache[path] = loader;
+                _loaderCache[abFileName] = loader;
             }
 
             return loader;
@@ -297,6 +312,7 @@ namespace Uzen.AB
 
         public AssetBundleInfo GetBundleInfo(string key)
         {
+            key = key.ToLower();
             var e = _loadedAssetBundle.GetEnumerator();
             while (e.MoveNext())
             {
@@ -363,6 +379,15 @@ namespace Uzen.AB
             if (_currentLoadQueue.Count == 0 && _nonCompleteLoaderSet.Count == 0)
             {
                 _isCurrentLoading = false;
+
+                var e = _thisTimeLoaderSet.GetEnumerator();
+                while (e.MoveNext())
+                {
+                    AssetBundleLoader cur = e.Current;
+                    if (cur.bundleInfo != null)
+                        cur.bundleInfo.ResetLifeTime();
+                }
+                _thisTimeLoaderSet.Clear();
             }
             else
             {
@@ -451,12 +476,5 @@ namespace Uzen.AB
                 this.RemoveBundleInfo(abi);
             }
         }
-
-#if UNITY_EDITOR
-        public List<AssetBundleInfo> GetAllAssetBundleInfos()
-        {
-            return new List<AssetBundleInfo>(_loadedAssetBundle.Values);
-        }
-#endif
     }
 }

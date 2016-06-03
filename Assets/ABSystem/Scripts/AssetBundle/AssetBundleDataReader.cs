@@ -104,8 +104,6 @@ public class AssetBundleDataReader
     {
         if (fullName != null)
         {
-            fullName = fullName.ToLower();
-
             if (infoMap.ContainsKey(fullName))
                 return infoMap[fullName];
         }
