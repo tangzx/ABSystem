@@ -15,14 +15,15 @@ namespace Tangzx.ABSystem
         [MenuItem("ABSystem/Builde AssetBundles")]
         static void BuildAssetBundles()
         {
-            AssetBundleBuildConfig config = AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
+            AssetBundleBuildConfig config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
+
             if (config == null)
                 return;
 
 #if UNITY_5
-            ABBuilder builder = new AssetBundleBuilder5x(new AssetBundlePathResolver());
+			ABBuilder builder = new AssetBundleBuilder5x(new AssetBundlePathResolver());
 #else
-        ABBuilder builder = new AssetBundleBuilder4x(new AssetBundlePathResolver());
+			ABBuilder builder = new AssetBundleBuilder4x(new AssetBundlePathResolver());
 #endif
             builder.SetDataWriter(config.depInfoFileFormat == AssetBundleBuildConfig.Format.Text ? new AssetBundleDataWriter() : new AssetBundleDataBinaryWriter());
 
@@ -38,6 +39,15 @@ namespace Tangzx.ABSystem
             builder.Export();
             builder.End();
         }
+
+		static T LoadAssetAtPath<T>(string path) where T:Object
+		{
+#if UNITY_5
+			return AssetDatabase.LoadAssetAtPath<T>(savePath);
+#else
+			return (T)AssetDatabase.LoadAssetAtPath(savePath, typeof(T));
+#endif
+		}
 
         class Styles
         {
@@ -73,7 +83,7 @@ namespace Tangzx.ABSystem
             bool execBuild = false;
             if (config == null)
             {
-                config = AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
+                config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
                 if (config == null)
                 {
                     config = new AssetBundleBuildConfig();
@@ -165,7 +175,7 @@ namespace Tangzx.ABSystem
         {
             AssetBundlePathResolver pathResolver = new AssetBundlePathResolver();
 
-            if (AssetDatabase.LoadAssetAtPath<AssetBundleBuildConfig>(savePath) == null)
+            if (LoadAssetAtPath<AssetBundleBuildConfig>(savePath) == null)
             {
                 AssetDatabase.CreateAsset(config, savePath);
             }
