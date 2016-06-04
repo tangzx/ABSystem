@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Uzen.AB;
+using Tangzx.ABSystem;
 
 /// <summary>
 /// 在IOS下的加载

@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Uzen.AB;
+using Tangzx.ABSystem;
 
 class AndroidAssetBundleLoader : MobileAssetBundleLoader
 {

@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Uzen.AB
+namespace Tangzx.ABSystem
 {
     class AssetCacheInfo
     {

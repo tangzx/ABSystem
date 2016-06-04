@@ -2,112 +2,114 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Uzen.AB;
 
-public class AssetBundleBuilder4x : ABBuilder
+namespace Tangzx.ABSystem
 {
-    static BuildAssetBundleOptions options =
-        BuildAssetBundleOptions.DeterministicAssetBundle |
-        BuildAssetBundleOptions.CollectDependencies |
-        BuildAssetBundleOptions.UncompressedAssetBundle |
-        BuildAssetBundleOptions.CompleteAssets;
-
-    /// <summary>
-    /// 本次增量更新的
-    /// </summary>
-    protected List<AssetTarget> newBuildTargets = new List<AssetTarget>();
-
-    public AssetBundleBuilder4x(AssetBundlePathResolver pathResolver) : base(pathResolver)
+    public class AssetBundleBuilder4x : ABBuilder
     {
+        static BuildAssetBundleOptions options =
+            BuildAssetBundleOptions.DeterministicAssetBundle |
+            BuildAssetBundleOptions.CollectDependencies |
+            BuildAssetBundleOptions.UncompressedAssetBundle |
+            BuildAssetBundleOptions.CompleteAssets;
 
-    }
+        /// <summary>
+        /// 本次增量更新的
+        /// </summary>
+        protected List<AssetTarget> newBuildTargets = new List<AssetTarget>();
 
-    public override void Export()
-    {
-        try
+        public AssetBundleBuilder4x(AssetBundlePathResolver pathResolver) : base(pathResolver)
         {
-            base.Export();
 
-            //Build Export Tree
-            var all = AssetBundleUtils.GetAll();
-            List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
-            foreach (AssetTarget target in all)
-            {
-                target.AnalyzeIfDepTreeChanged();
-                BuildExportTree(target, tree, 0);
-            }
-
-            //Export
-            this.Export(tree, 0);
-            this.SaveDepAll(all);
-            this.RemoveUnused(all);
-            AssetDatabase.Refresh();
         }
-        catch(Exception e)
-        {
-            Debug.LogException(e);
-        }
-    }
 
-    void BuildExportTree(AssetTarget parent, List<List<AssetTarget>> tree, int currentLevel)
-    {
-        if (parent.level == -1 && parent.type != AssetType.Builtin)
+        public override void Export()
         {
-            List<AssetTarget> levelList = null;
-            if (tree.Count > currentLevel)
+            try
             {
-                levelList = tree[currentLevel];
-            }
-            else
-            {
-                levelList = new List<AssetTarget>();
-                tree.Add(levelList);
-            }
-            levelList.Add(parent);
-            parent.UpdateLevel(currentLevel + 1, levelList);
+                base.Export();
 
-            foreach (AssetTarget ei in parent.dependsChildren)
-            {
-                if (ei.level != -1 && ei.level <= parent.level)
+                //Build Export Tree
+                var all = AssetBundleUtils.GetAll();
+                List<List<AssetTarget>> tree = new List<List<AssetTarget>>();
+                foreach (AssetTarget target in all)
                 {
-                    ei.UpdateLevel(-1, null);
+                    target.AnalyzeIfDepTreeChanged();
+                    BuildExportTree(target, tree, 0);
                 }
-                BuildExportTree(ei, tree, currentLevel + 1);
+
+                //Export
+                this.Export(tree, 0);
+                this.SaveDepAll(all);
+                this.RemoveUnused(all);
+                AssetDatabase.Refresh();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
-    }
 
-    void Export(List<List<AssetTarget>> tree, int currentLevel)
-    {
-        if (currentLevel >= tree.Count)
-            return;
-
-        BuildPipeline.PushAssetDependencies();
-        List<AssetTarget> levelList = tree[currentLevel];
-
-        //把Child个数多的放在前面
-        levelList.Sort();
-
-        foreach (AssetTarget ei in levelList)
+        void BuildExportTree(AssetTarget parent, List<List<AssetTarget>> tree, int currentLevel)
         {
-            Export(ei);
+            if (parent.level == -1 && parent.type != AssetType.Builtin)
+            {
+                List<AssetTarget> levelList = null;
+                if (tree.Count > currentLevel)
+                {
+                    levelList = tree[currentLevel];
+                }
+                else
+                {
+                    levelList = new List<AssetTarget>();
+                    tree.Add(levelList);
+                }
+                levelList.Add(parent);
+                parent.UpdateLevel(currentLevel + 1, levelList);
+
+                foreach (AssetTarget ei in parent.dependsChildren)
+                {
+                    if (ei.level != -1 && ei.level <= parent.level)
+                    {
+                        ei.UpdateLevel(-1, null);
+                    }
+                    BuildExportTree(ei, tree, currentLevel + 1);
+                }
+            }
         }
-        if (currentLevel < tree.Count)
+
+        void Export(List<List<AssetTarget>> tree, int currentLevel)
         {
-            Export(tree, currentLevel + 1);
+            if (currentLevel >= tree.Count)
+                return;
+
+            BuildPipeline.PushAssetDependencies();
+            List<AssetTarget> levelList = tree[currentLevel];
+
+            //把Child个数多的放在前面
+            levelList.Sort();
+
+            foreach (AssetTarget ei in levelList)
+            {
+                Export(ei);
+            }
+            if (currentLevel < tree.Count)
+            {
+                Export(tree, currentLevel + 1);
+            }
+            BuildPipeline.PopAssetDependencies();
         }
-        BuildPipeline.PopAssetDependencies();
-    }
 
-    void Export(AssetTarget target)
-    {
-        if (target.needExport)
+        void Export(AssetTarget target)
         {
-            //写入 .assetbundle 包
-            target.WriteBundle(options);
+            if (target.needExport)
+            {
+                //写入 .assetbundle 包
+                target.WriteBundle(options);
 
-            if (target.isNewBuild)
-                newBuildTargets.Add(target);
+                if (target.isNewBuild)
+                    newBuildTargets.Add(target);
+            }
         }
     }
 }

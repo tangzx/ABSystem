@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Uzen.AB
+namespace Tangzx.ABSystem
 {
     /// <summary>
     /// Loader 父类

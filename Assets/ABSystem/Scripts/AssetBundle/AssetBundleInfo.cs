@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Uzen.AB;
+using Tangzx.ABSystem;
 using Object = UnityEngine.Object;
 
 public class AssetBundleInfo

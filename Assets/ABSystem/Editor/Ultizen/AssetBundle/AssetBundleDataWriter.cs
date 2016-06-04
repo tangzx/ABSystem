@@ -1,43 +1,45 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Uzen.AB;
 
-public class AssetBundleDataWriter
+namespace Tangzx.ABSystem
 {
-    public void Save(string path, AssetTarget[] targets)
+    public class AssetBundleDataWriter
     {
-        FileStream fs = new FileStream(path, FileMode.CreateNew);
-        Save(fs, targets);
-    }
-
-    public virtual void Save(Stream stream, AssetTarget[] targets)
-    {
-        StreamWriter sw = new StreamWriter(stream);
-        //写入文件头判断文件类型用，ABDT 意思即 Asset-Bundle-Data-Text
-        sw.WriteLine("ABDT");
-
-        for (int i = 0; i < targets.Length; i++)
+        public void Save(string path, AssetTarget[] targets)
         {
-            AssetTarget target = targets[i];
-            HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
-            target.GetDependencies(deps);
-
-            //bundle name
-            sw.WriteLine(target.bundleName);
-            //File Name
-            sw.WriteLine(target.bundleShortName);
-            //hash
-            sw.WriteLine(target.bundleCrc);
-            //type
-            sw.WriteLine((int)target.compositeType);
-            //写入依赖信息
-            sw.WriteLine(deps.Count);
-
-            foreach (AssetTarget item in deps)
-            {
-                sw.WriteLine(item.bundleName);
-            }
+            FileStream fs = new FileStream(path, FileMode.CreateNew);
+            Save(fs, targets);
         }
-        sw.Close();
+
+        public virtual void Save(Stream stream, AssetTarget[] targets)
+        {
+            StreamWriter sw = new StreamWriter(stream);
+            //写入文件头判断文件类型用，ABDT 意思即 Asset-Bundle-Data-Text
+            sw.WriteLine("ABDT");
+
+            for (int i = 0; i < targets.Length; i++)
+            {
+                AssetTarget target = targets[i];
+                HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
+                target.GetDependencies(deps);
+
+                //bundle name
+                sw.WriteLine(target.bundleName);
+                //File Name
+                sw.WriteLine(target.bundleShortName);
+                //hash
+                sw.WriteLine(target.bundleCrc);
+                //type
+                sw.WriteLine((int)target.compositeType);
+                //写入依赖信息
+                sw.WriteLine(deps.Count);
+
+                foreach (AssetTarget item in deps)
+                {
+                    sw.WriteLine(item.bundleName);
+                }
+            }
+            sw.Close();
+        }
     }
 }

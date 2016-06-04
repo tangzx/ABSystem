@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
-using Uzen.AB;
+using Tangzx.ABSystem;
 
 /// <summary>
 /// 编辑器模式下用的加载器

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace Uzen.AB
+namespace Tangzx.ABSystem
 {
     public enum LoadState
     {

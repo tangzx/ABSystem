@@ -2,111 +2,114 @@
 using System.Collections.Generic;
 using System.IO;
 
-public class AssetBundleData
+namespace Tangzx.ABSystem
 {
-    public string shortName;
-    public string fullName;
-    public string hash;
-    public AssetBundleExportType compositeType;
-    public string[] dependencies;
-    public bool isAnalyzed;
-    public AssetBundleData[] dependList;
-}
-
-public class AssetBundleDataReader
-{
-    public Dictionary<string, AssetBundleData> infoMap = new Dictionary<string, AssetBundleData>();
-
-    protected Dictionary<string, string> shortName2FullName = new Dictionary<string, string>();
-
-    public virtual void Read(Stream fs)
+    public class AssetBundleData
     {
-        StreamReader sr = new StreamReader(fs);
-        char[] fileHeadChars = new char[6];
-        sr.Read(fileHeadChars, 0, fileHeadChars.Length);
-        //读取文件头判断文件类型，ABDT 意思即 Asset-Bundle-Data-Text
-        if (fileHeadChars[0] != 'A' || fileHeadChars[1] != 'B' || fileHeadChars[2] != 'D' || fileHeadChars[3] != 'T')
-            return;
+        public string shortName;
+        public string fullName;
+        public string hash;
+        public AssetBundleExportType compositeType;
+        public string[] dependencies;
+        public bool isAnalyzed;
+        public AssetBundleData[] dependList;
+    }
 
-        while (true)
+    public class AssetBundleDataReader
+    {
+        public Dictionary<string, AssetBundleData> infoMap = new Dictionary<string, AssetBundleData>();
+
+        protected Dictionary<string, string> shortName2FullName = new Dictionary<string, string>();
+
+        public virtual void Read(Stream fs)
         {
-            string name = sr.ReadLine();
-            if (string.IsNullOrEmpty(name))
-                break;
+            StreamReader sr = new StreamReader(fs);
+            char[] fileHeadChars = new char[6];
+            sr.Read(fileHeadChars, 0, fileHeadChars.Length);
+            //读取文件头判断文件类型，ABDT 意思即 Asset-Bundle-Data-Text
+            if (fileHeadChars[0] != 'A' || fileHeadChars[1] != 'B' || fileHeadChars[2] != 'D' || fileHeadChars[3] != 'T')
+                return;
 
-            string shortFileName = sr.ReadLine();
-            string hash = sr.ReadLine();
-            int typeData = Convert.ToInt32(sr.ReadLine());
-            int depsCount = Convert.ToInt32(sr.ReadLine());
-            string[] deps = new string[depsCount];
-
-            if (!shortName2FullName.ContainsKey(shortFileName))
-                shortName2FullName.Add(shortFileName, name);
-            for (int i = 0; i < depsCount; i++)
+            while (true)
             {
-                deps[i] = sr.ReadLine();
+                string name = sr.ReadLine();
+                if (string.IsNullOrEmpty(name))
+                    break;
+
+                string shortFileName = sr.ReadLine();
+                string hash = sr.ReadLine();
+                int typeData = Convert.ToInt32(sr.ReadLine());
+                int depsCount = Convert.ToInt32(sr.ReadLine());
+                string[] deps = new string[depsCount];
+
+                if (!shortName2FullName.ContainsKey(shortFileName))
+                    shortName2FullName.Add(shortFileName, name);
+                for (int i = 0; i < depsCount; i++)
+                {
+                    deps[i] = sr.ReadLine();
+                }
+
+                AssetBundleData info = new AssetBundleData();
+                info.hash = hash;
+                info.fullName = name;
+                info.shortName = shortFileName;
+                info.dependencies = deps;
+                info.compositeType = (AssetBundleExportType)typeData;
+                infoMap[name] = info;
             }
-
-            AssetBundleData info = new AssetBundleData();
-            info.hash = hash;
-            info.fullName = name;
-            info.shortName = shortFileName;
-            info.dependencies = deps;
-            info.compositeType = (AssetBundleExportType)typeData;
-            infoMap[name] = info;
+            sr.Close();
         }
-        sr.Close();
-    }
 
-    /// <summary>
-    /// 分析生成依赖树
-    /// </summary>
-    public void Analyze()
-    {
-        var e = infoMap.GetEnumerator();
-        while (e.MoveNext())
+        /// <summary>
+        /// 分析生成依赖树
+        /// </summary>
+        public void Analyze()
         {
-            Analyze(e.Current.Value);
-        }
-    }
-
-    void Analyze(AssetBundleData abd)
-    {
-        if (!abd.isAnalyzed)
-        {
-            abd.isAnalyzed = true;
-            abd.dependList = new AssetBundleData[abd.dependencies.Length];
-            for (int i = 0; i < abd.dependencies.Length; i++)
+            var e = infoMap.GetEnumerator();
+            while (e.MoveNext())
             {
-                AssetBundleData dep = this.GetAssetBundleInfo(abd.dependencies[i]);
-                abd.dependList[i] = dep;
-                this.Analyze(dep);
+                Analyze(e.Current.Value);
             }
         }
-    }
 
-    public string GetFullName(string shortName)
-    {
-        string fullName = null;
-        shortName2FullName.TryGetValue(shortName, out fullName);
-        return fullName;
-    }
-
-    public AssetBundleData GetAssetBundleInfoByShortName(string shortName)
-    {
-        string fullName = GetFullName(shortName);
-        if (fullName != null && infoMap.ContainsKey(fullName))
-            return infoMap[fullName];
-        return null;
-    }
-
-    public AssetBundleData GetAssetBundleInfo(string fullName)
-    {
-        if (fullName != null)
+        void Analyze(AssetBundleData abd)
         {
-            if (infoMap.ContainsKey(fullName))
+            if (!abd.isAnalyzed)
+            {
+                abd.isAnalyzed = true;
+                abd.dependList = new AssetBundleData[abd.dependencies.Length];
+                for (int i = 0; i < abd.dependencies.Length; i++)
+                {
+                    AssetBundleData dep = this.GetAssetBundleInfo(abd.dependencies[i]);
+                    abd.dependList[i] = dep;
+                    this.Analyze(dep);
+                }
+            }
+        }
+
+        public string GetFullName(string shortName)
+        {
+            string fullName = null;
+            shortName2FullName.TryGetValue(shortName, out fullName);
+            return fullName;
+        }
+
+        public AssetBundleData GetAssetBundleInfoByShortName(string shortName)
+        {
+            string fullName = GetFullName(shortName);
+            if (fullName != null && infoMap.ContainsKey(fullName))
                 return infoMap[fullName];
+            return null;
         }
-        return null;
+
+        public AssetBundleData GetAssetBundleInfo(string fullName)
+        {
+            if (fullName != null)
+            {
+                if (infoMap.ContainsKey(fullName))
+                    return infoMap[fullName];
+            }
+            return null;
+        }
     }
 }

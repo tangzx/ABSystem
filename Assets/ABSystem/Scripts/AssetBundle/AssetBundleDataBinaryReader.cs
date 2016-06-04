@@ -1,51 +1,54 @@
 ﻿using System.IO;
 
-class AssetBundleDataBinaryReader : AssetBundleDataReader
+namespace Tangzx.ABSystem
 {
-    public override void Read(Stream fs)
+    class AssetBundleDataBinaryReader : AssetBundleDataReader
     {
-        if (fs.Length < 4) return;
-
-        BinaryReader sr = new BinaryReader(fs);
-        char[] fileHeadChars = sr.ReadChars(4);
-        //读取文件头判断文件类型，ABDB 意思即 Asset-Bundle-Data-Binary
-        if (fileHeadChars[0] != 'A' || fileHeadChars[1] != 'B' || fileHeadChars[2] != 'D' || fileHeadChars[3] != 'B')
-            return;
-        
-        int namesCount = sr.ReadInt32();
-        string[] names = new string[namesCount];
-        for (int i = 0; i < namesCount; i++)
+        public override void Read(Stream fs)
         {
-            names[i] = sr.ReadString();
-        }
+            if (fs.Length < 4) return;
 
-        while (true)
-        {
-            if (fs.Position == fs.Length)
-                break;
+            BinaryReader sr = new BinaryReader(fs);
+            char[] fileHeadChars = sr.ReadChars(4);
+            //读取文件头判断文件类型，ABDB 意思即 Asset-Bundle-Data-Binary
+            if (fileHeadChars[0] != 'A' || fileHeadChars[1] != 'B' || fileHeadChars[2] != 'D' || fileHeadChars[3] != 'B')
+                return;
 
-            string name = names[sr.ReadInt32()];
-            string shortFileName = sr.ReadString();
-            string hash = sr.ReadString();
-            int typeData = sr.ReadInt32();
-            int depsCount = sr.ReadInt32();
-            string[] deps = new string[depsCount];
-
-            if (!shortName2FullName.ContainsKey(shortFileName))
-                shortName2FullName.Add(shortFileName, name);
-            for (int i = 0; i < depsCount; i++)
+            int namesCount = sr.ReadInt32();
+            string[] names = new string[namesCount];
+            for (int i = 0; i < namesCount; i++)
             {
-                deps[i] = names[sr.ReadInt32()];
+                names[i] = sr.ReadString();
             }
 
-            AssetBundleData info = new AssetBundleData();
-            info.hash = hash;
-            info.fullName = name;
-            info.shortName = shortFileName;
-            info.dependencies = deps;
-            info.compositeType = (AssetBundleExportType)typeData;
-            infoMap[name] = info;
+            while (true)
+            {
+                if (fs.Position == fs.Length)
+                    break;
+
+                string name = names[sr.ReadInt32()];
+                string shortFileName = sr.ReadString();
+                string hash = sr.ReadString();
+                int typeData = sr.ReadInt32();
+                int depsCount = sr.ReadInt32();
+                string[] deps = new string[depsCount];
+
+                if (!shortName2FullName.ContainsKey(shortFileName))
+                    shortName2FullName.Add(shortFileName, name);
+                for (int i = 0; i < depsCount; i++)
+                {
+                    deps[i] = names[sr.ReadInt32()];
+                }
+
+                AssetBundleData info = new AssetBundleData();
+                info.hash = hash;
+                info.fullName = name;
+                info.shortName = shortFileName;
+                info.dependencies = deps;
+                info.compositeType = (AssetBundleExportType)typeData;
+                infoMap[name] = info;
+            }
+            sr.Close();
         }
-        sr.Close();
     }
 }

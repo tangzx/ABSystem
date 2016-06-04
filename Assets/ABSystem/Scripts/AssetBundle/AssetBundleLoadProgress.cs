@@ -1,4 +1,4 @@
-﻿using Uzen.AB;
+﻿using Tangzx.ABSystem;
 
 public class AssetBundleLoadProgress
 {

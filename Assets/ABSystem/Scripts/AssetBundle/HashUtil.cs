@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Uzen.AB
+namespace Tangzx.ABSystem
 {
     public class HashUtil
     {

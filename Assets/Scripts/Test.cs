@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Uzen.AB;
+using Tangzx.ABSystem;
 
 public class Test : MonoBehaviour
 {
