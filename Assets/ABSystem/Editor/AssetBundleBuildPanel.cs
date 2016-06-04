@@ -129,7 +129,11 @@ namespace Tangzx.ABSystem
                 GUILayout.BeginHorizontal();
                 {
                     filter.valid = GUILayout.Toggle(filter.valid, "", GUILayout.ExpandWidth(false));
+
+                    GUI.enabled = false;
                     filter.path = GUILayout.TextField(filter.path, GUILayout.ExpandWidth(true));
+                    GUI.enabled = true;
+
                     if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
                     {
                         string dataPath = Application.dataPath;
