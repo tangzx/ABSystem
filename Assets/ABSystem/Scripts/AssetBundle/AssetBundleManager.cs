@@ -258,11 +258,6 @@ namespace Tangzx.ABSystem
             if (_nonCompleteLoaderSet.Count > 0)
             {
                 List<AssetBundleLoader> loaders = new List<AssetBundleLoader>(_nonCompleteLoaderSet);
-                for (int i = 0; i < loaders.Count; i++)
-                {
-                    this.CheckNonCompleteDependLoaders(loaders[i]);
-                }
-                loaders = new List<AssetBundleLoader>(_nonCompleteLoaderSet);
                 _nonCompleteLoaderSet.Clear();
 
                 var e = loaders.GetEnumerator();
@@ -280,20 +275,6 @@ namespace Tangzx.ABSystem
                     e.Current.Load();
                 }
             }
-        }
-
-        void CheckNonCompleteDependLoaders(AssetBundleLoader loader)
-        {
-            /*
-            for (int i = 0; i < loader.depLoaders.Count; i++)
-            {
-                AssetBundleLoader depLoader = loader.depLoaders[i];
-                if (depLoader.state < LoadState.State_Loading && _nonCompleteLoaderSet.Contains(depLoader) == false)
-                {
-                    _nonCompleteLoaderSet.Add(depLoader);
-                }
-            }
-            */
         }
         
         public void RemoveAll()
