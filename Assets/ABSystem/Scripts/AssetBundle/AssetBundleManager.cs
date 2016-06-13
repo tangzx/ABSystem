@@ -380,11 +380,11 @@ namespace Tangzx.ABSystem
         {
             if (abi == null)
                 abi = new AssetBundleInfo();
-            abi.bundleName = loader.bundleName;
+            abi.bundleName = loader.bundleName.ToLower();
             abi.bundle = assetBundle;
             abi.data = loader.bundleData;
 
-            _loadedAssetBundle[loader.bundleName] = abi;
+            _loadedAssetBundle[abi.bundleName] = abi;
             return abi;
         }
 
