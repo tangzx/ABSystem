@@ -1,4 +1,9 @@
-﻿using System;
+﻿#if !AB_MODE && UNITY_EDITOR
+#else
+#define _AB_MODE_
+#endif
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -90,10 +95,10 @@ namespace Tangzx.ABSystem
         public void Init(Action callback)
         {
             _initCallback = callback;
-#if !AB_MODE && UNITY_EDITOR
-            this.InitComplete();
-#else
+#if _AB_MODE_
             this.StartCoroutine(LoadDepInfo());
+#else
+            this.InitComplete();
 #endif
         }
 
@@ -173,10 +178,10 @@ namespace Tangzx.ABSystem
 
         public AssetBundleLoader Load(string path, LoadAssetCompleteHandler handler = null)
         {
-#if !AB_MODE && UNITY_EDITOR
-            AssetBundleLoader loader = this.CreateLoader(path);
-#else
+#if _AB_MODE_
             AssetBundleLoader loader = this.CreateLoader(HashUtil.Get(path.ToLower()) + ".ab", path);
+#else
+            AssetBundleLoader loader = this.CreateLoader(path);
 #endif
             if (loader == null)
             {
@@ -214,11 +219,7 @@ namespace Tangzx.ABSystem
             }
             else
             {
-#if !AB_MODE && UNITY_EDITOR
-                loader = this.CreateLoader();
-                loader.bundleManager = this;
-                loader.bundleName = abFileName;
-#else
+#if _AB_MODE_
                 AssetBundleData data = _depInfoReader.GetAssetBundleInfo(abFileName);
                 if (data == null && oriName != null)
                 {
@@ -233,6 +234,10 @@ namespace Tangzx.ABSystem
                 loader.bundleManager = this;
                 loader.bundleData = data;
                 loader.bundleName = data.fullName;
+#else
+                loader = this.CreateLoader();
+                loader.bundleManager = this;
+                loader.bundleName = abFileName;
 #endif
                 _loaderCache[abFileName] = loader;
             }
@@ -294,6 +299,9 @@ namespace Tangzx.ABSystem
         public AssetBundleInfo GetBundleInfo(string key)
         {
             key = key.ToLower();
+#if _AB_MODE_
+            key = HashUtil.Get(key) + ".ab";
+#endif
             var e = _loadedAssetBundle.GetEnumerator();
             while (e.MoveNext())
             {
