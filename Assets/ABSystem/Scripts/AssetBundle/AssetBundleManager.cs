@@ -247,9 +247,7 @@ namespace Tangzx.ABSystem
 
         protected virtual AssetBundleLoader CreateLoader()
         {
-#if UNITY_EDITOR && AB_MODE
-            return new MobileAssetBundleLoader();
-#elif UNITY_EDITOR
+#if UNITY_EDITOR
             return new EditorModeAssetBundleLoader();
 #elif UNITY_IOS
             return new IOSAssetBundleLoader();

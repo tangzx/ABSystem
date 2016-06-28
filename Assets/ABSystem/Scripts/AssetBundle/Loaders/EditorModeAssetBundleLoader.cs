@@ -1,8 +1,19 @@
 ﻿#if UNITY_EDITOR
+using Tangzx.ABSystem;
+
+#if AB_MODE
+/// <summary>
+/// 编辑器模式并启用AB_MODE下用的加载器
+/// </summary>
+public class EditorModeAssetBundleLoader : MobileAssetBundleLoader
+{
+
+}
+
+#else
 using System.Collections;
 using UnityEditor;
 using UnityEngine;
-using Tangzx.ABSystem;
 
 /// <summary>
 /// 编辑器模式下用的加载器
@@ -47,4 +58,6 @@ public class EditorModeAssetBundleLoader : AssetBundleLoader
         this.Complete();
     }
 }
+#endif
+
 #endif
