@@ -252,7 +252,7 @@ namespace Tangzx.ABSystem
 #elif UNITY_IOS
             return new IOSAssetBundleLoader();
 #elif UNITY_ANDROID
-            return new AndroidAssetBundleLoader();
+            return new MobileAssetBundleLoader();
 #else
             return new MobileAssetBundleLoader();
 #endif
