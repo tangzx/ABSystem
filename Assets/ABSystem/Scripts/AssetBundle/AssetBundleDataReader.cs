@@ -15,6 +15,20 @@ namespace Tangzx.ABSystem
         public AssetBundleData[] dependList;
     }
 
+    /// <summary>
+    /// 文本文件格式说明
+    /// *固定一行字符串ABDT
+    /// 循环 { AssetBundleData
+    ///     *名字(string)
+    ///     *短名字(string)
+    ///     *Hash值(string)
+    ///     *类型(AssetBundleExportType)
+    ///     *依赖文件个数M(int)
+    ///     循环 M {
+    ///         *依赖的AB文件名(string)
+    ///     }
+    /// }
+    /// </summary>
     public class AssetBundleDataReader
     {
         public Dictionary<string, AssetBundleData> infoMap = new Dictionary<string, AssetBundleData>();
