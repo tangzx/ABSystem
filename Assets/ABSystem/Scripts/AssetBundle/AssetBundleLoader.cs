@@ -144,14 +144,14 @@ namespace Tangzx.ABSystem
         {
             if (state != LoadState.State_Error)
             {
-#if UNITY_5_3 || UNITY_5_4
+                //兼容低版本API
+#if UNITY_4 || UNITY_5_1 || UNITY_5_2
+                _bundle = AssetBundle.CreateFromFile(_assetBundleCachedFile);
+                yield return null;
+#else
                 AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleCachedFile);
                 yield return req;
                 _bundle = req.assetBundle;
-#else
-
-                _bundle = AssetBundle.CreateFromFile(_assetBundleCachedFile);
-                yield return null;
 #endif
 
                 this.Complete();

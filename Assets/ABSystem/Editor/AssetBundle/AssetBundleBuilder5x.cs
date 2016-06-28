@@ -38,10 +38,10 @@ namespace Tangzx.ABSystem
             //开始打包
             BuildPipeline.BuildAssetBundles(this.pathResolver.BundleSavePath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
 
-#if UNITY_5_3 || UNITY_5_4
-            AssetBundle ab = AssetBundle.LoadFromFile(pathResolver.BundleSavePath + "/AssetBundles");
+#if UNITY_5_1 || UNITY_5_2
+            AssetBundle ab = AssetBundle.CreateFromFile(pathResolver.BundleSavePath + "/AssetBundles");
 #else
-        AssetBundle ab = AssetBundle.CreateFromFile(pathResolver.BundleSavePath + "/AssetBundles");
+            AssetBundle ab = AssetBundle.LoadFromFile(pathResolver.BundleSavePath + "/AssetBundles");
 #endif
             AssetBundleManifest manifest = ab.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
             //清除所有 asset bundle name

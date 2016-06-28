@@ -1,6 +1,6 @@
 ﻿using System.Collections;
-using UnityEngine;
 using Tangzx.ABSystem;
+using UnityEngine;
 
 /// <summary>
 /// 在IOS下的加载
@@ -11,13 +11,14 @@ public class IOSAssetBundleLoader : MobileAssetBundleLoader
 {
     protected override IEnumerator LoadFromBuiltin()
     {
-#if UNITY_5_3 || UNITY_5_4
+        //兼容低版本API
+#if UNITY_4 || UNITY_5_1 || UNITY_5_2
+        _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
+        yield return null;
+#else
         AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleSourceFile);
         yield return req;
         _bundle = req.assetBundle;
-#else
-        _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
-        yield return null;
 #endif
         this.Complete();
     }
