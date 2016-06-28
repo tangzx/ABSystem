@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 
 namespace Tangzx.ABSystem
 {
@@ -77,9 +78,29 @@ namespace Tangzx.ABSystem
         /// AB 依赖信息文件名
         /// </summary>
         public virtual string DependFileName { get { return "dep.all"; } }
+
+        DirectoryInfo cacheDir;
+
         /// <summary>
-        /// 运行时AB缓存的路径
+        /// 用于缓存AB的目录，要求可写
         /// </summary>
-        public virtual string BundleCacheDir { get { return string.Format("{0}/AssetBundles", Application.streamingAssetsPath); } }
+        public virtual string BundleCacheDir
+        {
+            get
+            {
+                if (cacheDir == null)
+                {
+#if UNITY_ANDROID
+                    string dir = string.Format("{0}/AssetBundles", Application.persistentDataPath);
+#else
+                    string dir = string.Format("{0}/AssetBundles", Application.streamingAssetsPath);
+#endif
+                    cacheDir = new DirectoryInfo(dir);
+                    if (!cacheDir.Exists)
+                        cacheDir.Create();
+                }
+                return cacheDir.FullName;
+            }
+        }
     }
 }
