@@ -262,7 +262,8 @@ namespace Tangzx.ABSystem
         {
             if (_nonCompleteLoaderSet.Count > 0)
             {
-                List<AssetBundleLoader> loaders = new List<AssetBundleLoader>(_nonCompleteLoaderSet);
+                List<AssetBundleLoader> loaders = ListPool<AssetBundleLoader>.Get();
+                loaders.AddRange(_nonCompleteLoaderSet);
                 _nonCompleteLoaderSet.Clear();
 
                 var e = loaders.GetEnumerator();
@@ -279,6 +280,7 @@ namespace Tangzx.ABSystem
                 {
                     e.Current.Load();
                 }
+                ListPool<AssetBundleLoader>.Release(loaders);
             }
         }
         
@@ -419,7 +421,9 @@ namespace Tangzx.ABSystem
         {
             if (_isCurrentLoading == false || force)
             {
-                List<string> keys = new List<string>(_loadedAssetBundle.Keys);
+                List<string> keys = ListPool<string>.Get();
+                keys.AddRange(_loadedAssetBundle.Keys);
+
                 bool hasUnusedBundle = false;
                 //一次最多卸载的个数，防止卸载过多太卡
                 int unloadLimit = 20;
@@ -442,11 +446,13 @@ namespace Tangzx.ABSystem
 
                             this.RemoveBundleInfo(abi);
 
+                            keys.RemoveAt(i);
                             i--;
-                            keys.Remove(key);
                         }
                     }
                 } while (hasUnusedBundle && !_isCurrentLoading && unloadCount < unloadLimit);
+
+                ListPool<string>.Release(keys);
 #if UNITY_EDITOR
                 if (unloadCount > 0)
                 {
