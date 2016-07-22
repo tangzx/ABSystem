@@ -1,9 +1,10 @@
-﻿using Tangzx.ABSystem;
-
-public class AssetBundleLoadProgress
+﻿namespace Tangzx.ABSystem
 {
-    public float percent;
-    public int total;
-    public int complete;
-    public AssetBundleLoader loader;
+    public class AssetBundleLoadProgress
+    {
+        public float percent;
+        public int total;
+        public int complete;
+        public AssetBundleLoader loader;
+    }
 }

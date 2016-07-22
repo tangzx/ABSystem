@@ -1,25 +1,27 @@
 ﻿using System.Collections;
-using Tangzx.ABSystem;
 using UnityEngine;
 
-/// <summary>
-/// 在IOS下的加载
-/// 注意：
-/// IOS下加载可以进行优化：直接在raw目录里进行File读取
-/// </summary>
-public class IOSAssetBundleLoader : MobileAssetBundleLoader
+namespace Tangzx.ABSystem
 {
-    protected override IEnumerator LoadFromBuiltin()
+    /// <summary>
+    /// 在IOS下的加载
+    /// 注意：
+    /// IOS下加载可以进行优化：直接在raw目录里进行File读取
+    /// </summary>
+    public class IOSAssetBundleLoader : MobileAssetBundleLoader
     {
-        //兼容低版本API
+        protected override IEnumerator LoadFromBuiltin()
+        {
+            //兼容低版本API
 #if UNITY_4 || UNITY_5_1 || UNITY_5_2
         _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
         yield return null;
 #else
-        AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleSourceFile);
-        yield return req;
-        _bundle = req.assetBundle;
+            AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleSourceFile);
+            yield return req;
+            _bundle = req.assetBundle;
 #endif
-        this.Complete();
+            this.Complete();
+        }
     }
 }

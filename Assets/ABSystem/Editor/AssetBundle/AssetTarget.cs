@@ -265,8 +265,7 @@ namespace Tangzx.ABSystem
             if (_cacheInfo != null)
             {
                 HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
-                this.GetDependencies(deps);
-                AssetTarget[] ar = deps.ToArray();
+                GetDependencies(deps);
 
                 if (deps.Count != _cacheInfo.depNames.Length)
                 {
@@ -536,7 +535,8 @@ namespace Tangzx.ABSystem
                 return AssetBundleUtils.GetFileHash(file.FullName);
         }
 
-        public void WriteBundle(BuildAssetBundleOptions options)
+#if UNITY_4
+        public void BuildBundle(BuildAssetBundleOptions options)
         {
             string savePath = Path.Combine(Path.GetTempPath(), bundleName);
 
@@ -549,7 +549,6 @@ namespace Tangzx.ABSystem
 
             for (int i = 0; i < children.Count; i++)
             {
-                var item = children[i];
                 assets[i + 1] = children[i].asset;
             }
 
@@ -579,6 +578,7 @@ namespace Tangzx.ABSystem
             if (_isNewBuild)
                 File.Copy(savePath, bundleSavePath, true);
         }
+#endif
 
         public void WriteCache(StreamWriter sw)
         {

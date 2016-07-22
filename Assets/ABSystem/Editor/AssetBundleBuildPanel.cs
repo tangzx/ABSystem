@@ -9,7 +9,7 @@ namespace Tangzx.ABSystem
         [MenuItem("ABSystem/Builder Panel")]
         static void Open()
         {
-            AssetBundleBuildPanel panel = GetWindow<AssetBundleBuildPanel>("ABSystem", true);
+            GetWindow<AssetBundleBuildPanel>("ABSystem", true);
         }
 
         [MenuItem("ABSystem/Builde AssetBundles")]
@@ -177,7 +177,7 @@ namespace Tangzx.ABSystem
 
         void Save()
         {
-            AssetBundlePathResolver pathResolver = new AssetBundlePathResolver();
+            AssetBundlePathResolver.instance = new AssetBundlePathResolver();
 
             if (LoadAssetAtPath<AssetBundleBuildConfig>(savePath) == null)
             {

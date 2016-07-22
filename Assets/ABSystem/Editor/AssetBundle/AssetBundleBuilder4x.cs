@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_4
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -105,7 +106,7 @@ namespace Tangzx.ABSystem
             if (target.needExport)
             {
                 //写入 .assetbundle 包
-                target.WriteBundle(options);
+                target.BuildBundle(options);
 
                 if (target.isNewBuild)
                     newBuildTargets.Add(target);
@@ -113,3 +114,4 @@ namespace Tangzx.ABSystem
         }
     }
 }
+#endif
