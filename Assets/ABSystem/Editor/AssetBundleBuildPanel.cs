@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace Tangzx.ABSystem
@@ -49,61 +50,97 @@ namespace Tangzx.ABSystem
 #endif
 		}
 
-        class Styles
-        {
-            public static GUIStyle box;
-            public static GUIStyle toolbar;
-            public static GUIStyle toolbarButton;
-            public static GUIStyle tooltip;
-        }
-
         const string savePath = "Assets/ABSystem/config.asset";
 
-        AssetBundleBuildConfig config;
+        private AssetBundleBuildConfig _config;
+        private ReorderableList _list;
 
         AssetBundleBuildPanel()
         {
 
         }
 
-        void UpdateStyles()
+        void OnListElementGUI(Rect rect, int index, bool isactive, bool isfocused)
         {
-            Styles.box = new GUIStyle(GUI.skin.box);
-            Styles.box.margin = new RectOffset();
-            Styles.box.padding = new RectOffset();
-            Styles.toolbar = new GUIStyle(EditorStyles.toolbar);
-            Styles.toolbar.margin = new RectOffset();
-            Styles.toolbar.padding = new RectOffset();
-            Styles.toolbarButton = EditorStyles.toolbarButton;
-            Styles.tooltip = GUI.skin.GetStyle("AssetLabel");
+            const float GAP = 5;
+
+            AssetBundleFilter filter = _config.filters[index];
+            rect.y++;
+
+            Rect r = rect;
+            r.width = 16;
+            r.height = 18;
+            filter.valid = GUI.Toggle(r, filter.valid, GUIContent.none);
+
+            r.xMin = r.xMax + GAP;
+            r.xMax = rect.xMax - 300;
+            GUI.enabled = false;
+            filter.path = GUI.TextField(r, filter.path);
+            GUI.enabled = true;
+
+            r.xMin = r.xMax + GAP;
+            r.width = 50;
+            if (GUI.Button(r, "Select"))
+            {
+                string dataPath = Application.dataPath;
+                string selectedPath = EditorUtility.OpenFolderPanel("Path", dataPath, "");
+                if (!string.IsNullOrEmpty(selectedPath))
+                {
+                    if (selectedPath.StartsWith(dataPath))
+                    {
+                        filter.path = "Assets/" + selectedPath.Substring(dataPath.Length + 1);
+                    }
+                    else
+                    {
+                        ShowNotification(new GUIContent("不能在Assets目录之外!"));
+                    }
+                }
+            }
+
+            r.xMin = r.xMax + GAP;
+            r.xMax = rect.xMax;
+            filter.filter = GUI.TextField(r, filter.filter);
+        }
+
+        void OnListHeaderGUI(Rect rect)
+        {
+            EditorGUI.LabelField(rect, "Asset Filter");
         }
 
         void OnGUI()
         {
             bool execBuild = false;
-            if (config == null)
+            if (_config == null)
             {
-                config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
-                if (config == null)
+                _config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
+                if (_config == null)
                 {
-                    config = new AssetBundleBuildConfig();
+                    _config = new AssetBundleBuildConfig();
                 }
             }
 
-            UpdateStyles();
-            //tool bar
-            GUILayout.BeginHorizontal(Styles.toolbar);
+            if (_list == null)
             {
-                if (GUILayout.Button("Add", Styles.toolbarButton))
+                _list = new ReorderableList(_config.filters, typeof(AssetBundleFilter));
+                _list.drawElementCallback = OnListElementGUI;
+                _list.drawHeaderCallback = OnListHeaderGUI;
+                _list.draggable = true;
+                _list.elementHeight = 22;
+            }
+
+            //tool bar
+            GUILayout.BeginHorizontal(EditorStyles.toolbar);
+            {
+                if (GUILayout.Button("Add", EditorStyles.toolbarButton))
                 {
-                    config.filters.Add(new AssetBundleFilter());
+                    _config.filters.Add(new AssetBundleFilter());
                 }
-                if (GUILayout.Button("Save", Styles.toolbarButton))
+                if (GUILayout.Button("Save", EditorStyles.toolbarButton))
                 {
                     Save();
                 }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Build", Styles.toolbarButton))
+                if (GUILayout.Button("Build", EditorStyles.toolbarButton))
                 {
                     execBuild = true;
                 }
@@ -117,53 +154,18 @@ namespace Tangzx.ABSystem
             GUILayout.BeginHorizontal();
             {
                 EditorGUILayout.PrefixLabel("DepInfoFileFormat");
-                config.depInfoFileFormat = (AssetBundleBuildConfig.Format)EditorGUILayout.EnumPopup(config.depInfoFileFormat);
+                _config.depInfoFileFormat = (AssetBundleBuildConfig.Format)EditorGUILayout.EnumPopup(_config.depInfoFileFormat);
             }
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
-
-            for (int i = 0; i < config.filters.Count; i++)
-            {
-                AssetBundleFilter filter = config.filters[i];
-                GUILayout.BeginHorizontal();
-                {
-                    filter.valid = GUILayout.Toggle(filter.valid, "", GUILayout.ExpandWidth(false));
-
-                    GUI.enabled = false;
-                    filter.path = GUILayout.TextField(filter.path, GUILayout.ExpandWidth(true));
-                    GUI.enabled = true;
-
-                    if (GUILayout.Button("Select", GUILayout.ExpandWidth(false)))
-                    {
-                        string dataPath = Application.dataPath;
-                        string selectedPath = EditorUtility.OpenFolderPanel("Path", dataPath, "");
-                        if (!string.IsNullOrEmpty(selectedPath))
-                        {
-                            if (selectedPath.StartsWith(dataPath))
-                            {
-                                filter.path = "Assets/" + selectedPath.Substring(dataPath.Length + 1);
-                            }
-                            else
-                            {
-                                ShowNotification(new GUIContent("不能在Assets目录之外!"));
-                            }
-                        }
-                    }
-                    filter.filter = GUILayout.TextField(filter.filter, GUILayout.Width(200));
-                    if (GUILayout.Button("X", GUILayout.ExpandWidth(false)))
-                    {
-                        config.filters.RemoveAt(i);
-                        i--;
-                    }
-                }
-                GUILayout.EndHorizontal();
-            }
+            
+            _list.DoLayoutList();
             GUILayout.EndVertical();
 
             //set dirty
             if (GUI.changed)
-                EditorUtility.SetDirty(config);
+                EditorUtility.SetDirty(_config);
 
             if (execBuild)
                 Build();
@@ -181,11 +183,11 @@ namespace Tangzx.ABSystem
 
             if (LoadAssetAtPath<AssetBundleBuildConfig>(savePath) == null)
             {
-                AssetDatabase.CreateAsset(config, savePath);
+                AssetDatabase.CreateAsset(_config, savePath);
             }
             else
             {
-                EditorUtility.SetDirty(config);
+                EditorUtility.SetDirty(_config);
             }
         }
     }
