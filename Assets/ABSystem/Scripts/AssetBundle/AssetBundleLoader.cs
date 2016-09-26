@@ -135,12 +135,16 @@ namespace Tangzx.ABSystem
             _assetBundleSourceFile = bundleManager.pathResolver.GetBundleSourceFile(bundleName);
 
             if (File.Exists(_assetBundleCachedFile))
-                bundleManager.StartCoroutine(LoadFromFile());
+                bundleManager.StartCoroutine(LoadFromCachedFile());
             else
-                bundleManager.StartCoroutine(LoadFromBuiltin());
+                bundleManager.StartCoroutine(LoadFromPackage());
         }
 
-        protected virtual IEnumerator LoadFromFile()
+        /// <summary>
+        /// 从已缓存的文件里加载
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerator LoadFromCachedFile()
         {
             if (state != LoadState.State_Error)
             {
@@ -158,7 +162,11 @@ namespace Tangzx.ABSystem
             }
         }
 
-        protected virtual IEnumerator LoadFromBuiltin()
+        /// <summary>
+        /// 从源文件(安装包里)加载
+        /// </summary>
+        /// <returns></returns>
+        protected virtual IEnumerator LoadFromPackage()
         {
             if (state != LoadState.State_Error)
             {
@@ -166,6 +174,7 @@ namespace Tangzx.ABSystem
                 WWW www = new WWW(_assetBundleSourceFile);
                 yield return www;
 
+                //加载完缓存一份，便于下次快速加载
                 if (www.error == null)
                 {
                     File.WriteAllBytes(_assetBundleCachedFile, www.bytes);

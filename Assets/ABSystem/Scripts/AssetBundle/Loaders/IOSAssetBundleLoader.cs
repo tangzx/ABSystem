@@ -10,12 +10,12 @@ namespace Tangzx.ABSystem
     /// </summary>
     public class IOSAssetBundleLoader : MobileAssetBundleLoader
     {
-        protected override IEnumerator LoadFromBuiltin()
+        protected override IEnumerator LoadFromPackage()
         {
             //兼容低版本API
 #if UNITY_4 || UNITY_5_1 || UNITY_5_2
-        _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
-        yield return null;
+            _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
+            yield return null;
 #else
             AssetBundleCreateRequest req = AssetBundle.LoadFromFileAsync(_assetBundleSourceFile);
             yield return req;

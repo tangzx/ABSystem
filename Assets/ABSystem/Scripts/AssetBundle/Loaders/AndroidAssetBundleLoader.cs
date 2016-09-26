@@ -8,12 +8,12 @@ namespace Tangzx.ABSystem
     /// </summary>
     class AndroidAssetBundleLoader : MobileAssetBundleLoader
     {
-        protected override IEnumerator LoadFromBuiltin()
+        protected override IEnumerator LoadFromPackage()
         {
             //兼容低版本API
 #if UNITY_4 || UNITY_5_1 || UNITY_5_2
-        _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
-        yield return null;
+            _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
+            yield return null;
 #else
             //直接用 LoadFromFile
             _assetBundleSourceFile = bundleManager.pathResolver.GetBundleSourceFile(bundleName, false);
