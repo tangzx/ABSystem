@@ -32,7 +32,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 同时最大的加载数
         /// </summary>
-        private const int MAX_REQUEST = 3;
+        private const int MAX_REQUEST = 100;
         /// <summary>
         /// 可再次申请的加载数
         /// </summary>
