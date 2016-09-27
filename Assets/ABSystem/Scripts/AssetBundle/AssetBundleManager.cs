@@ -24,6 +24,7 @@ namespace Tangzx.ABSystem
         public static Version version = new Version(0, 1, 0);
         public static AssetBundleManager Instance;
         public static string NAME = "AssetBundleManager";
+        public static bool enableLog = true;
 
         public delegate void LoadAssetCompleteHandler(AssetBundleInfo info);
         public delegate void LoaderCompleteHandler(AssetBundleLoader info);
@@ -454,10 +455,9 @@ namespace Tangzx.ABSystem
 
                 ListPool<string>.Release(keys);
 #if UNITY_EDITOR
-                if (unloadCount > 0)
+                if (unloadCount > 0 && enableLog)
                 {
                     Debug.Log("===>> Unload Count: " + unloadCount);
-                    Resources.UnloadUnusedAssets();
                 }
 #endif
             }

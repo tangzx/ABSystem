@@ -258,7 +258,8 @@ namespace Tangzx.ABSystem
         {
             if (bundle != null)
             {
-                Debug.Log("Unload : " + data.compositeType + " >> " + bundleName);
+                if (AssetBundleManager.enableLog)
+                    Debug.Log("Unload : " + data.compositeType + " >> " + bundleName);
 
                 bundle.Unload(false);
             }
