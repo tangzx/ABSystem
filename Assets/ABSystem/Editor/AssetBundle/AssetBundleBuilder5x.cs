@@ -59,6 +59,7 @@ namespace Tangzx.ABSystem
             ab.Unload(true);
             this.RemoveUnused(all);
 
+            AssetDatabase.RemoveUnusedAssetBundleNames();
             AssetDatabase.Refresh();
         }
     }
