@@ -72,19 +72,17 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 我要依赖的项
         /// </summary>
-        private HashSet<AssetTarget> _dependencies = new HashSet<AssetTarget>();
+        private HashSet<AssetTarget> _dependParentSet = new HashSet<AssetTarget>();
         /// <summary>
         /// 依赖我的项
         /// </summary>
-        private HashSet<AssetTarget> _dependsChildren = new HashSet<AssetTarget>();
+        private HashSet<AssetTarget> _dependChildrenSet = new HashSet<AssetTarget>();
 
         public AssetTarget(Object o, FileInfo file, string assetPath)
         {
             this.asset = o;
             this.file = file;
             this.assetPath = assetPath;
-            //this.bundleName = AssetBundleUtils.ConvertToABName(assetPath);
-            //this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
             this.bundleShortName = file.Name.ToLower();
             this.bundleName = HashUtil.Get(AssetBundleUtils.ConvertToABName(assetPath)) + ".ab";
             this.bundleSavePath = Path.Combine(AssetBundleUtils.pathResolver.BundleSavePath, bundleName);
@@ -172,7 +170,7 @@ namespace Tangzx.ABSystem
                 if (path.StartsWith("Resources"))
                 {
                     AssetTarget builtinAsset = AssetBundleUtils.Load(dep);
-                    this.AddDepend(builtinAsset);
+                    this.AddDependParent(builtinAsset);
                     builtinAsset.Analyze();
                 }
             }
@@ -195,7 +193,7 @@ namespace Tangzx.ABSystem
                 if (target == null)
                     continue;
 
-                this.AddDepend(target);
+                this.AddDependParent(target);
 
                 target.Analyze();
             }
@@ -205,11 +203,11 @@ namespace Tangzx.ABSystem
         {
             if (this.NeedExportStandalone())
             {
-                var children = new List<AssetTarget>(_dependsChildren);
-                this.RemoveDependsChildren();
+                var children = new List<AssetTarget>(_dependChildrenSet);
+                this.RemoveDependChildren();
                 foreach (AssetTarget child in children)
                 {
-                    child.AddDepend(this);
+                    child.AddDependParent(this);
                 }
             }
         }
@@ -223,7 +221,7 @@ namespace Tangzx.ABSystem
                     rootSet.Add(this);
                     break;
                 default:
-                    foreach (AssetTarget item in _dependsChildren)
+                    foreach (AssetTarget item in _dependChildrenSet)
                     {
                         item.GetRoot(rootSet);
                     }
@@ -241,7 +239,7 @@ namespace Tangzx.ABSystem
             if (beforeExportProcess) return;
             beforeExportProcess = true;
 
-            foreach (AssetTarget item in _dependsChildren)
+            foreach (AssetTarget item in _dependChildrenSet)
             {
                 item.BeforeExport();
             }
@@ -299,7 +297,7 @@ namespace Tangzx.ABSystem
         /// <param name="list"></param>
         public void GetDependencies(HashSet<AssetTarget> list)
         {
-            var ie = _dependencies.GetEnumerator();
+            var ie = _dependParentSet.GetEnumerator();
             while (ie.MoveNext())
             {
                 AssetTarget target = ie.Current;
@@ -316,7 +314,7 @@ namespace Tangzx.ABSystem
 
         public List<AssetTarget> dependencies
         {
-            get { return new List<AssetTarget>(_dependencies); }
+            get { return new List<AssetTarget>(_dependParentSet); }
         }
 
         public AssetBundleExportType compositeType
@@ -324,7 +322,7 @@ namespace Tangzx.ABSystem
             get
             {
                 AssetBundleExportType type = exportType;
-                if (type == AssetBundleExportType.Root && _dependsChildren.Count > 0)
+                if (type == AssetBundleExportType.Root && _dependChildrenSet.Count > 0)
                     type |= AssetBundleExportType.Asset;
                 return type;
             }
@@ -359,7 +357,7 @@ namespace Tangzx.ABSystem
                 if (_isFileChanged || _isDepTreeChanged)
                     return true;
 
-                foreach (AssetTarget child in _dependsChildren)
+                foreach (AssetTarget child in _dependChildrenSet)
                 {
                     if (child.needRebuild)
                         return true;
@@ -420,19 +418,19 @@ namespace Tangzx.ABSystem
         /// <returns></returns>
         private bool NeedExportStandalone()
         {
-            return _dependsChildren.Count > 1;
+            return _dependChildrenSet.Count > 1;
         }
 
         /// <summary>
         /// 增加依赖项
         /// </summary>
         /// <param name="target"></param>
-        private void AddDepend(AssetTarget target)
+        private void AddDependParent(AssetTarget target)
         {
             if (target == this || this.ContainsDepend(target))
                 return;
 
-            _dependencies.Add(target);
+            _dependParentSet.Add(target);
             target.AddDependChild(this);
             this.ClearParentDepend(target);
         }
@@ -445,11 +443,11 @@ namespace Tangzx.ABSystem
         /// <returns></returns>
         private bool ContainsDepend(AssetTarget target, bool recursive = true)
         {
-            if (_dependencies.Contains(target))
+            if (_dependParentSet.Contains(target))
                 return true;
             if (recursive)
             {
-                var e = _dependencies.GetEnumerator();
+                var e = _dependParentSet.GetEnumerator();
                 while (e.MoveNext())
                 {
                     if (e.Current.ContainsDepend(target, true))
@@ -463,7 +461,7 @@ namespace Tangzx.ABSystem
 
         private void AddDependChild(AssetTarget parent)
         {
-            _dependsChildren.Add(parent);
+            _dependChildrenSet.Add(parent);
         }
 
         /// <summary>
@@ -471,15 +469,15 @@ namespace Tangzx.ABSystem
         /// </summary>
         private void ClearParentDepend(AssetTarget target = null)
         {
-            IEnumerable<AssetTarget> cols = _dependencies;
+            IEnumerable<AssetTarget> cols = _dependParentSet;
             if (target != null) cols = new AssetTarget[] { target };
             foreach (AssetTarget at in cols)
             {
-                var e = _dependsChildren.GetEnumerator();
+                var e = _dependChildrenSet.GetEnumerator();
                 while (e.MoveNext())
                 {
                     AssetTarget dc = e.Current;
-                    dc.RemoveDepend(at);
+                    dc.RemoveDependParent(at);
                 }
             }
         }
@@ -489,28 +487,28 @@ namespace Tangzx.ABSystem
         /// </summary>
         /// <param name="target"></param>
         /// <param name="recursive"></param>
-        private void RemoveDepend(AssetTarget target, bool recursive = true)
+        private void RemoveDependParent(AssetTarget target, bool recursive = true)
         {
-            _dependencies.Remove(target);
-            target._dependsChildren.Remove(this);
+            _dependParentSet.Remove(target);
+            target._dependChildrenSet.Remove(this);
 
             //recursive
-			var dcc = new HashSet<AssetTarget>(_dependsChildren);
+			var dcc = new HashSet<AssetTarget>(_dependChildrenSet);
             var e = dcc.GetEnumerator();
             while (e.MoveNext())
             {
                 AssetTarget dc = e.Current;
-                dc.RemoveDepend(target);
+                dc.RemoveDependParent(target);
             }
         }
 
-        private void RemoveDependsChildren()
+        private void RemoveDependChildren()
         {
-            var all = new List<AssetTarget>(_dependsChildren);
-            _dependsChildren.Clear();
+            var all = new List<AssetTarget>(_dependChildrenSet);
+            _dependChildrenSet.Clear();
             foreach (AssetTarget child in all)
             {
-                child._dependencies.Remove(this);
+                child._dependParentSet.Remove(this);
             }
         }
 
@@ -519,12 +517,12 @@ namespace Tangzx.ABSystem
         /// </summary>
         public List<AssetTarget> dependsChildren
         {
-            get { return new List<AssetTarget>(_dependsChildren); }
+            get { return new List<AssetTarget>(_dependChildrenSet); }
         }
 
         int System.IComparable<AssetTarget>.CompareTo(AssetTarget other)
         {
-            return other._dependsChildren.Count.CompareTo(_dependsChildren.Count);
+            return other._dependChildrenSet.Count.CompareTo(_dependChildrenSet.Count);
         }
 
         public string GetHash()
