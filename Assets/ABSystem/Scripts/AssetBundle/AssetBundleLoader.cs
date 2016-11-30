@@ -16,7 +16,8 @@ namespace Tangzx.ABSystem
         public AssetBundleInfo bundleInfo;
         public AssetBundleManager bundleManager;
         public LoadState state = LoadState.State_None;
-        public AssetBundleLoader[] depLoaders;
+
+        protected AssetBundleLoader[] depLoaders;
         
         public virtual void Load()
         {
