@@ -353,7 +353,8 @@ namespace Tangzx.ABSystem
 
         internal void LoadError(AssetBundleLoader loader)
         {
-            this.LoadComplete(loader);
+            Debug.LogWarning("Cant load AB : " + loader.bundleName, this);
+            LoadComplete(loader);
         }
 
         internal void LoadComplete(AssetBundleLoader loader)

@@ -180,12 +180,16 @@ namespace Tangzx.ABSystem
                     File.WriteAllBytes(_assetBundleCachedFile, www.bytes);
 
                     _bundle = www.assetBundle;
+
+                    Complete();
+                }
+                else
+                {
+                    Error();
                 }
 
                 www.Dispose();
                 www = null;
-
-                this.Complete();
             }
         }
 
