@@ -41,7 +41,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 当前申请要加载的队列
         /// </summary>
-        private Queue<AssetBundleLoader> _requestQueue = new Queue<AssetBundleLoader>();
+        private List<AssetBundleLoader> _requestQueue = new List<AssetBundleLoader>();
 
         /// <summary>
         /// 加载队列
@@ -91,6 +91,15 @@ namespace Tangzx.ABSystem
         protected void Awake()
         {
 			InvokeRepeating("CheckUnusedBundle", 0, 5);
+        }
+
+        void Update()
+        {
+            if (_isCurrentLoading)
+            {
+                CheckNewLoaders();
+                CheckQueue();
+            }
         }
 
         public void Init(Action callback)
@@ -177,36 +186,38 @@ namespace Tangzx.ABSystem
             return _depInfoReader.GetFullName(shortFileName);
         }
 
+        /// <summary>
+        /// 用默认优先级为0的值加载
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="handler">回调</param>
+        /// <returns></returns>
         public AssetBundleLoader Load(string path, LoadAssetCompleteHandler handler = null)
+        {
+            return Load(path, 0, handler);
+        }
+
+        /// <summary>
+        /// 通过一个路径加载ab
+        /// </summary>
+        /// <param name="path">路径</param>
+        /// <param name="prority">优先级</param>
+        /// <param name="handler">回调</param>
+        /// <returns></returns>
+        public AssetBundleLoader Load(string path, int prority, LoadAssetCompleteHandler handler = null)
         {
 #if _AB_MODE_
             AssetBundleLoader loader = this.CreateLoader(HashUtil.Get(path.ToLower()) + ".ab", path);
 #else
             AssetBundleLoader loader = this.CreateLoader(path);
 #endif
-            if (loader == null)
-            {
-                handler(null);
-            }
-            else
-            {
-                _thisTimeLoaderSet.Add(loader);
-                if (loader.isComplete)
-                {
-                    if (handler != null)
-                        handler(loader.bundleInfo);
-                }
-                else
-                {
-                    if (handler != null)
-                        loader.onComplete += handler;
-                    _isCurrentLoading = true;
+            loader.prority = prority;
+            loader.onComplete += handler;
 
-                    if (loader.state < LoadState.State_Loading)
-                        _nonCompleteLoaderSet.Add(loader);
-                    this.StartLoad();
-                }
-            }
+            _isCurrentLoading = true;
+            _nonCompleteLoaderSet.Add(loader);
+            _thisTimeLoaderSet.Add(loader);
+
             return loader;
         }
 
@@ -228,7 +239,7 @@ namespace Tangzx.ABSystem
                 }
                 if (data == null)
                 {
-                    return null;
+                    return new MissAssetBundleLoader();
                 }
 
                 loader = this.CreateLoader();
@@ -259,7 +270,7 @@ namespace Tangzx.ABSystem
 #endif
         }
 
-        void StartLoad()
+        void CheckNewLoaders()
         {
             if (_nonCompleteLoaderSet.Count > 0)
             {
@@ -279,7 +290,7 @@ namespace Tangzx.ABSystem
                 e = loaders.GetEnumerator();
                 while (e.MoveNext())
                 {
-                    e.Current.Load();
+                    e.Current.Start();
                 }
                 ListPool<AssetBundleLoader>.Release(loaders);
             }
@@ -319,26 +330,23 @@ namespace Tangzx.ABSystem
         /// 请求加载Bundle，这里统一分配加载时机，防止加载太卡
         /// </summary>
         /// <param name="loader"></param>
-        internal void RequestLoadBundle(AssetBundleLoader loader)
+        internal void Enqueue(AssetBundleLoader loader)
         {
-            if (_requestRemain < 0) _requestRemain = 0;
-
-            if (_requestRemain == 0)
-            {
-                _requestQueue.Enqueue(loader);
-            }
-            else
-            {
-                this.LoadBundle(loader);
-            }
+            if (_requestRemain < 0)
+                _requestRemain = 0;
+            _requestQueue.Add(loader);
         }
 
-        void CheckRequestList()
+        void CheckQueue()
         {
+            if (_requestRemain > 0 && _requestQueue.Count > 0)
+                _requestQueue.Sort();
+
             while (_requestRemain > 0 && _requestQueue.Count > 0)
             {
-                AssetBundleLoader loader = _requestQueue.Dequeue();
-                this.LoadBundle(loader);
+                AssetBundleLoader loader = _requestQueue[0];
+                _requestQueue.RemoveAt(0);
+                LoadBundle(loader);
             }
         }
 
@@ -366,9 +374,10 @@ namespace Tangzx.ABSystem
             {
                 _progress.loader = loader;
                 _progress.complete = _progress.total - _currentLoadQueue.Count;
-                this.onProgress(_progress);
+                onProgress(_progress);
             }
 
+            //all complete
             if (_currentLoadQueue.Count == 0 && _nonCompleteLoaderSet.Count == 0)
             {
                 _isCurrentLoading = false;
@@ -381,10 +390,6 @@ namespace Tangzx.ABSystem
                         cur.bundleInfo.ResetLifeTime();
                 }
                 _thisTimeLoaderSet.Clear();
-            }
-            else
-            {
-                this.CheckRequestList();
             }
         }
 

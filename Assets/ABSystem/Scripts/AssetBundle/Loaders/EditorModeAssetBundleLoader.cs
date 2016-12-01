@@ -36,7 +36,7 @@ namespace Tangzx.ABSystem
             }
         }
 
-        public override void Load()
+        public override void Start()
         {
             if (bundleInfo == null)
             {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
 
@@ -7,10 +8,11 @@ namespace Tangzx.ABSystem
     /// <summary>
     /// Loader 父类
     /// </summary>
-    public abstract class AssetBundleLoader
+    public abstract class AssetBundleLoader : IComparable<AssetBundleLoader>
     {
-        internal AssetBundleManager.LoadAssetCompleteHandler onComplete;
+        static int idCounter = 0;
 
+        public AssetBundleManager.LoadAssetCompleteHandler onComplete;
         public string bundleName;
         public AssetBundleData bundleData;
         public AssetBundleInfo bundleInfo;
@@ -18,10 +20,17 @@ namespace Tangzx.ABSystem
         public LoadState state = LoadState.State_None;
 
         protected AssetBundleLoader[] depLoaders;
-        
-        public virtual void Load()
-        {
 
+        private int _prority;
+
+        public AssetBundleLoader()
+        {
+            id = idCounter++;
+        }
+        
+        public virtual void Start()
+        {
+            id = idCounter++;
         }
 
         /// <summary>
@@ -34,6 +43,24 @@ namespace Tangzx.ABSystem
 
         }
 
+        public int id
+        {
+            get; private set;
+        }
+
+        public int prority
+        {
+            get { return _prority; }
+            set
+            {
+                if (_prority != value)
+                {
+                    _prority = value;
+                    RefreshPrority();
+                }
+            }
+        }
+
         public virtual bool isComplete
         {
             get
@@ -42,26 +69,44 @@ namespace Tangzx.ABSystem
             }
         }
 
+        protected void RefreshPrority()
+        {
+            for (int i = 0; depLoaders != null && i < depLoaders.Length; i++)
+            {
+                AssetBundleLoader dep = depLoaders[i];
+                if (dep.prority < prority)
+                    dep.prority = prority;
+            }
+        }
+
         protected virtual void Complete()
         {
-            if (onComplete != null)
-            {
-                var handler = onComplete;
-                onComplete = null;
-                handler(bundleInfo);
-            }
+            FireEvent();
             bundleManager.LoadComplete(this);
         }
 
         protected virtual void Error()
         {
+            FireEvent();
+            bundleManager.LoadError(this);
+        }
+
+        public void FireEvent()
+        {
             if (onComplete != null)
             {
                 var handler = onComplete;
                 onComplete = null;
                 handler(bundleInfo);
             }
-            bundleManager.LoadError(this);
+        }
+
+        int IComparable<AssetBundleLoader>.CompareTo(AssetBundleLoader other)
+        {
+            if (other.prority == prority)
+                return id.CompareTo(other.id);
+            else
+                return other.prority.CompareTo(prority);
         }
     }
 
@@ -79,7 +124,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 开始加载
         /// </summary>
-        override public void Load()
+        override public void Start()
         {
             if (_hasError)
                 state = LoadState.State_Error;
@@ -109,6 +154,7 @@ namespace Tangzx.ABSystem
                 {
                     depLoaders[i] = bundleManager.CreateLoader(bundleData.dependencies[i]);
                 }
+                RefreshPrority();
             }
 
             _currentLoadingDepCount = 0;
@@ -119,7 +165,7 @@ namespace Tangzx.ABSystem
                 {
                     _currentLoadingDepCount++;
                     depLoader.onComplete += OnDepComplete;
-                    depLoader.Load();
+                    depLoader.Start();
                 }
             }
             this.CheckDepComplete();
@@ -204,7 +250,7 @@ namespace Tangzx.ABSystem
         {
             if (_currentLoadingDepCount == 0)
             {
-                bundleManager.RequestLoadBundle(this);
+                bundleManager.Enqueue(this);
             }
         }
 
