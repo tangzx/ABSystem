@@ -50,7 +50,7 @@ namespace Tangzx.ABSystem
 
         public void AddDependency(AssetBundleInfo target)
         {
-            if (deps.Add(target))
+            if (target != null && deps.Add(target))
             {
                 target.Retain();
                 target.depChildren.Add(this.bundleName);
