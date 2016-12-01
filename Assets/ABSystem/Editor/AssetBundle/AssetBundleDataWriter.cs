@@ -23,6 +23,8 @@ namespace Tangzx.ABSystem
                 HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
                 target.GetDependencies(deps);
 
+                //debug name
+                sw.WriteLine(target.assetPath);
                 //bundle name
                 sw.WriteLine(target.bundleName);
                 //File Name
@@ -38,6 +40,7 @@ namespace Tangzx.ABSystem
                 {
                     sw.WriteLine(item.bundleName);
                 }
+                sw.WriteLine("<------------->");
             }
             sw.Close();
         }

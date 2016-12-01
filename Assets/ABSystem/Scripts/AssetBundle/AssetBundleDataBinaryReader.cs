@@ -44,6 +44,7 @@ namespace Tangzx.ABSystem
                 if (fs.Position == fs.Length)
                     break;
 
+                string debugName = sr.ReadString();
                 string name = names[sr.ReadInt32()];
                 string shortFileName = sr.ReadString();
                 string hash = sr.ReadString();
@@ -62,6 +63,7 @@ namespace Tangzx.ABSystem
                 info.hash = hash;
                 info.fullName = name;
                 info.shortName = shortFileName;
+                info.debugName = debugName;
                 info.dependencies = deps;
                 info.compositeType = (AssetBundleExportType)typeData;
                 infoMap[name] = info;

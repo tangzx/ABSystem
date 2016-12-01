@@ -9,6 +9,7 @@ namespace Tangzx.ABSystem
         public string shortName;
         public string fullName;
         public string hash;
+        public string debugName;
         public AssetBundleExportType compositeType;
         public string[] dependencies;
         public bool isAnalyzed;
@@ -46,10 +47,11 @@ namespace Tangzx.ABSystem
 
             while (true)
             {
-                string name = sr.ReadLine();
-                if (string.IsNullOrEmpty(name))
+                string debugName = sr.ReadLine();
+                if (string.IsNullOrEmpty(debugName))
                     break;
 
+                string name = sr.ReadLine();
                 string shortFileName = sr.ReadLine();
                 string hash = sr.ReadLine();
                 int typeData = Convert.ToInt32(sr.ReadLine());
@@ -62,8 +64,10 @@ namespace Tangzx.ABSystem
                 {
                     deps[i] = sr.ReadLine();
                 }
+                sr.ReadLine(); // skip <------------->
 
                 AssetBundleData info = new AssetBundleData();
+                info.debugName = debugName;
                 info.hash = hash;
                 info.fullName = name;
                 info.shortName = shortFileName;
