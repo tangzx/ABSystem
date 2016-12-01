@@ -145,6 +145,9 @@ namespace Tangzx.ABSystem
             }
         }
 
+        /// <summary>
+        /// 先加载依赖项
+        /// </summary>
         void LoadDepends()
         {
             if (depLoaders == null)
@@ -161,7 +164,7 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < depLoaders.Length; i++)
             {
                 AssetBundleLoader depLoader = depLoaders[i];
-                if (depLoader.state != LoadState.State_Error && depLoader.state != LoadState.State_Complete)
+                if (!depLoader.isComplete)
                 {
                     _currentLoadingDepCount++;
                     depLoader.onComplete += OnDepComplete;
@@ -246,6 +249,9 @@ namespace Tangzx.ABSystem
             this.CheckDepComplete();
         }
 
+        /// <summary>
+        /// 依赖项结束，加载自身
+        /// </summary>
         void CheckDepComplete()
         {
             if (_currentLoadingDepCount == 0)
@@ -277,6 +283,7 @@ namespace Tangzx.ABSystem
         {
             this.bundleInfo = null;
             this.state = LoadState.State_None;
+            this.prority = 0;
         }
 
         override protected void Error()
