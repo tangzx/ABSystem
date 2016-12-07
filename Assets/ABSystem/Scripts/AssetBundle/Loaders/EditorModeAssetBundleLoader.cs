@@ -36,16 +36,8 @@ namespace Tangzx.ABSystem
             }
         }
 
-        public override void Start()
+        public override void Load()
         {
-            if (bundleInfo == null)
-            {
-                this.state = LoadState.State_Complete;
-                this.bundleInfo = bundleManager.CreateBundleInfo(this, new ABInfo());
-                this.bundleInfo.isReady = true;
-                this.bundleInfo.onUnloaded = OnBundleUnload;
-            }
-
             bundleManager.StartCoroutine(this.LoadResource());
         }
 
@@ -58,7 +50,26 @@ namespace Tangzx.ABSystem
         IEnumerator LoadResource()
         {
             yield return new WaitForEndOfFrame();
-            this.Complete();
+
+            string newPath = AssetBundlePathResolver.instance.GetEditorModePath(bundleName);
+            Object mainObject = AssetDatabase.LoadMainAssetAtPath(newPath);
+            if (mainObject)
+            {
+                if (bundleInfo == null)
+                {
+                    state = LoadState.State_Complete;
+                    bundleInfo = bundleManager.CreateBundleInfo(this, new ABInfo());
+                    bundleInfo.isReady = true;
+                    bundleInfo.onUnloaded = OnBundleUnload;
+                }
+
+                Complete();
+            }
+            else
+            {
+                state = LoadState.State_Error;
+                Error();
+            }
         }
     }
 }
