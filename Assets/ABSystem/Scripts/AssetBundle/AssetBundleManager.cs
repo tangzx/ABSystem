@@ -239,7 +239,9 @@ namespace Tangzx.ABSystem
                 }
                 if (data == null)
                 {
-                    return new MissAssetBundleLoader();
+                    MissAssetBundleLoader missLoader = new MissAssetBundleLoader();
+                    missLoader.bundleManager = this;
+                    return missLoader;
                 }
 
                 loader = this.CreateLoader();
