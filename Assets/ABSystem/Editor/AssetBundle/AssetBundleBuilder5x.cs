@@ -1,4 +1,5 @@
 ﻿#if UNITY_5
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,27 +17,23 @@ namespace Tangzx.ABSystem
         {
             base.Export();
 
+            List<AssetBundleBuild> list = new List<AssetBundleBuild>();
             //标记所有 asset bundle name
             var all = AssetBundleUtils.GetAll();
             for (int i = 0; i < all.Count; i++)
             {
                 AssetTarget target = all[i];
-                AssetImporter importer = AssetImporter.GetAtPath(target.assetPath);
-                if (importer)
+                if (target.needSelfExport)
                 {
-                    if (target.needSelfExport)
-                    {
-                        importer.assetBundleName = target.bundleName;
-                    }
-                    else
-                    {
-                        importer.assetBundleName = null;
-                    }
+                    AssetBundleBuild build = new AssetBundleBuild();
+                    build.assetBundleName = target.bundleName;
+                    build.assetNames = new string[] { target.assetPath };
+                    list.Add(build);
                 }
             }
 
             //开始打包
-            BuildPipeline.BuildAssetBundles(this.pathResolver.BundleSavePath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
+            BuildPipeline.BuildAssetBundles(pathResolver.BundleSavePath, list.ToArray(), BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
 
 #if UNITY_5_1 || UNITY_5_2
             AssetBundle ab = AssetBundle.CreateFromFile(pathResolver.BundleSavePath + "/AssetBundles");
@@ -44,16 +41,12 @@ namespace Tangzx.ABSystem
             AssetBundle ab = AssetBundle.LoadFromFile(pathResolver.BundleSavePath + "/AssetBundles");
 #endif
             AssetBundleManifest manifest = ab.LoadAsset("AssetBundleManifest") as AssetBundleManifest;
-            //清除所有 asset bundle name
+            //hash
             for (int i = 0; i < all.Count; i++)
             {
                 AssetTarget target = all[i];
                 Hash128 hash = manifest.GetAssetBundleHash(target.bundleName);
                 target.bundleCrc = hash.ToString();
-
-                AssetImporter importer = AssetImporter.GetAtPath(target.assetPath);
-                if (importer)
-                    importer.assetBundleName = null;
             }
             this.SaveDepAll(all);
             ab.Unload(true);
