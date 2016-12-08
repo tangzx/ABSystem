@@ -199,7 +199,7 @@ namespace Tangzx.ABSystem
             if (state != LoadState.State_Error)
             {
                 //兼容低版本API
-#if UNITY_4 || UNITY_5_1 || UNITY_5_2
+#if UNITY_4 || UNITY_4_6 || UNITY_5_1 || UNITY_5_2
                 _bundle = AssetBundle.CreateFromFile(_assetBundleCachedFile);
                 yield return null;
 #else

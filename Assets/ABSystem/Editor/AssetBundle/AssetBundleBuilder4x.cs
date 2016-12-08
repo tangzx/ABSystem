@@ -1,4 +1,4 @@
-﻿#if UNITY_4
+﻿#if UNITY_4 || UNITY_4_6
 using System;
 using System.Collections.Generic;
 using UnityEditor;

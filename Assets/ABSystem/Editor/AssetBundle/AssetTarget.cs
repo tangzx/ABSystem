@@ -533,7 +533,7 @@ namespace Tangzx.ABSystem
                 return AssetBundleUtils.GetFileHash(file.FullName);
         }
 
-#if UNITY_4
+#if UNITY_4 || UNITY_4_6
         public void BuildBundle(BuildAssetBundleOptions options)
         {
             string savePath = Path.Combine(Path.GetTempPath(), bundleName);

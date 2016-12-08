@@ -13,7 +13,7 @@ namespace Tangzx.ABSystem
         protected override IEnumerator LoadFromPackage()
         {
             //兼容低版本API
-#if UNITY_4 || UNITY_5_1 || UNITY_5_2
+#if UNITY_4 || UNITY_4_6 || UNITY_5_1 || UNITY_5_2
             _bundle = AssetBundle.CreateFromFile(_assetBundleSourceFile);
             yield return null;
 #else
