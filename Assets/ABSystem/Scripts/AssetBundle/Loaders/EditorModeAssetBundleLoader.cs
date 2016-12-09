@@ -1,14 +1,21 @@
 ﻿#if UNITY_EDITOR
 
 #if AB_MODE
+using System.Collections;
+
 namespace Tangzx.ABSystem
 {
     /// <summary>
     /// 编辑器模式并启用AB_MODE下用的加载器
+    /// 与iOS的相同，直接加载StreamAssets里的AB
     /// </summary>
-    public class EditorModeAssetBundleLoader : MobileAssetBundleLoader
+    public class EditorModeAssetBundleLoader : IOSAssetBundleLoader
     {
-
+        protected override IEnumerator LoadFromPackage()
+        {
+            _assetBundleSourceFile = AssetBundlePathResolver.instance.GetBundleSourceFile(bundleName, false);
+            return base.LoadFromPackage();
+        }
     }
 }
 #else

@@ -145,6 +145,10 @@ namespace Tangzx.ABSystem
         IEnumerator LoadDepInfo()
         {
             string depFile = string.Format("{0}/{1}", pathResolver.BundleCacheDir, pathResolver.DependFileName);
+            //编辑器模式下测试AB_MODE，直接读取
+#if UNITY_EDITOR
+            depFile = pathResolver.GetBundleSourceFile(pathResolver.DependFileName, false);
+#endif
 
             if (File.Exists(depFile))
             {
