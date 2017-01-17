@@ -162,6 +162,18 @@ namespace Tangzx.ABSystem
             return null;
         }
 
+        public T LoadAsset<T>(Object user, string name) where T : Object
+        {
+            if (bundle)
+            {
+                T asset = bundle.LoadAsset<T>(name);
+                if (asset)
+                    Retain(user);
+                return asset;
+            }
+            return null;
+        }
+
         /// <summary>
         /// 获取此对象
         /// </summary>
@@ -171,6 +183,16 @@ namespace Tangzx.ABSystem
         {
             this.Retain(user);
             return mainObject;
+        }
+
+        public T Require<T>(Object user) where T : Object
+        {
+            if (mainObject is T)
+            {
+                Retain(user);
+                return (T)mainObject;
+            }
+            return null;
         }
 
         /// <summary>
