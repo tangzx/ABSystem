@@ -21,4 +21,20 @@ namespace Tangzx.ABSystem
             s_ListPool.Release(toRelease);
         }
     }
+
+    internal static class HashSetPool<T>
+    {
+        // Object pool to avoid allocations.
+        private static readonly ObjectPool<HashSet<T>> s_ListPool = new ObjectPool<HashSet<T>>(null, l => l.Clear());
+
+        public static HashSet<T> Get()
+        {
+            return s_ListPool.Get();
+        }
+
+        public static void Release(HashSet<T> toRelease)
+        {
+            s_ListPool.Release(toRelease);
+        }
+    }
 }

@@ -39,9 +39,9 @@ namespace Tangzx.ABSystem
         [SerializeField]
         public int refCount { get; private set; }
 
-        private HashSet<AssetBundleInfo> deps = new HashSet<AssetBundleInfo>();
-        private List<string> depChildren = new List<string>();
-        private List<WeakReference> references = new List<WeakReference>();
+        private HashSet<AssetBundleInfo> deps = HashSetPool<AssetBundleInfo>.Get();
+        private List<string> depChildren = ListPool<string>.Get();
+        private List<WeakReference> references = ListPool<WeakReference>.Get();
 
         public AssetBundleInfo()
         {
@@ -218,11 +218,17 @@ namespace Tangzx.ABSystem
             while (e.MoveNext())
             {
                 AssetBundleInfo dep = e.Current;
-                dep.depChildren.Remove(this.bundleName);
+                if (dep.depChildren != null)
+                    dep.depChildren.Remove(this.bundleName);
                 dep.Release();
             }
-            deps.Clear();
-            references.Clear();
+            HashSetPool<AssetBundleInfo>.Release(deps);
+            deps = null;
+            ListPool<string>.Release(depChildren);
+            depChildren = null;
+            ListPool<WeakReference>.Release(references);
+            references = null;
+
             if (onUnloaded != null)
                 onUnloaded(this);
         }
