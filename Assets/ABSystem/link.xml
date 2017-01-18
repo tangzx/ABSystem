@@ -1,0 +1,17 @@
+<linker>
+    <assembly fullname="System.Core">
+        <namespace fullname="System.Security.Cryptography" preserve="all"/>
+    </assembly>
+    <assembly fullname="mscorlib">
+        <namespace fullname="System.Security.Cryptography" preserve="all"/>
+    </assembly>
+    <assembly fullname="System">
+        <namespace fullname="System.Security.Cryptography" preserve="all"/>
+    </assembly>
+    <assembly fullname="System.Security">
+        <namespace fullname="System.Security.Cryptography" preserve="all"/>
+    </assembly>
+    <assembly fullname="Mono.Security">
+        <namespace fullname="System.Security.Cryptography" preserve="all"/>
+    </assembly>
+</linker>
