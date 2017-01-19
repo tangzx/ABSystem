@@ -54,6 +54,7 @@ namespace Tangzx.ABSystem
 
         private AssetBundleBuildConfig _config;
         private ReorderableList _list;
+        private Vector2 _scrollPosition = Vector2.zero;
 
         AssetBundleBuildPanel()
         {
@@ -107,27 +108,37 @@ namespace Tangzx.ABSystem
             EditorGUI.LabelField(rect, "Asset Filter");
         }
 
-        void OnGUI()
+        void InitConfig()
         {
-            bool execBuild = false;
+            _config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
             if (_config == null)
             {
-                _config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
-                if (_config == null)
-                {
-                    _config = new AssetBundleBuildConfig();
-                }
+                _config = new AssetBundleBuildConfig();
+            }
+        }
+
+        void InitFilterListDrawer()
+        {
+            _list = new ReorderableList(_config.filters, typeof(AssetBundleFilter));
+            _list.drawElementCallback = OnListElementGUI;
+            _list.drawHeaderCallback = OnListHeaderGUI;
+            _list.draggable = true;
+            _list.elementHeight = 22;
+        }
+
+        void OnGUI()
+        {
+            if (_config == null)
+            {
+                InitConfig();
             }
 
             if (_list == null)
             {
-                _list = new ReorderableList(_config.filters, typeof(AssetBundleFilter));
-                _list.drawElementCallback = OnListElementGUI;
-                _list.drawHeaderCallback = OnListHeaderGUI;
-                _list.draggable = true;
-                _list.elementHeight = 22;
+                InitFilterListDrawer();
             }
 
+            bool execBuild = false;
             //tool bar
             GUILayout.BeginHorizontal(EditorStyles.toolbar);
             {
@@ -149,18 +160,24 @@ namespace Tangzx.ABSystem
 
             //context
             GUILayout.BeginVertical();
-
-            //format
-            GUILayout.BeginHorizontal();
             {
-                EditorGUILayout.PrefixLabel("DepInfoFileFormat");
-                _config.depInfoFileFormat = (AssetBundleBuildConfig.Format)EditorGUILayout.EnumPopup(_config.depInfoFileFormat);
-            }
-            GUILayout.EndHorizontal();
+                //format
+                GUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.PrefixLabel("DepInfoFileFormat");
+                    _config.depInfoFileFormat = (AssetBundleBuildConfig.Format)EditorGUILayout.EnumPopup(_config.depInfoFileFormat);
+                }
+                GUILayout.EndHorizontal();
 
-            GUILayout.Space(10);
-            
-            _list.DoLayoutList();
+                GUILayout.Space(10);
+
+                //Filter item list
+                _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
+                {
+                    _list.DoLayoutList();
+                }
+                GUILayout.EndScrollView();
+            }
             GUILayout.EndVertical();
 
             //set dirty
