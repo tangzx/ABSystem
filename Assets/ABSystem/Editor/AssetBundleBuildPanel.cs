@@ -83,24 +83,30 @@ namespace Tangzx.ABSystem
             r.width = 50;
             if (GUI.Button(r, "Select"))
             {
-                string dataPath = Application.dataPath;
-                string selectedPath = EditorUtility.OpenFolderPanel("Path", dataPath, "");
-                if (!string.IsNullOrEmpty(selectedPath))
-                {
-                    if (selectedPath.StartsWith(dataPath))
-                    {
-                        filter.path = "Assets/" + selectedPath.Substring(dataPath.Length + 1);
-                    }
-                    else
-                    {
-                        ShowNotification(new GUIContent("不能在Assets目录之外!"));
-                    }
-                }
+                filter.path = SelectFolder();
             }
 
             r.xMin = r.xMax + GAP;
             r.xMax = rect.xMax;
             filter.filter = GUI.TextField(r, filter.filter);
+        }
+
+        string SelectFolder()
+        {
+            string dataPath = Application.dataPath;
+            string selectedPath = EditorUtility.OpenFolderPanel("Path", dataPath, "");
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                if (selectedPath.StartsWith(dataPath))
+                {
+                    return "Assets/" + selectedPath.Substring(dataPath.Length + 1);
+                }
+                else
+                {
+                    ShowNotification(new GUIContent("不能在Assets目录之外!"));
+                }
+            }
+            return null;
         }
 
         void OnListHeaderGUI(Rect rect)
@@ -124,6 +130,18 @@ namespace Tangzx.ABSystem
             _list.drawHeaderCallback = OnListHeaderGUI;
             _list.draggable = true;
             _list.elementHeight = 22;
+            _list.onAddCallback = (list) => Add();
+        }
+
+        void Add()
+        {
+            string path = SelectFolder();
+            if (!string.IsNullOrEmpty(path))
+            {
+                var filter = new AssetBundleFilter();
+                filter.path = path;
+                _config.filters.Add(filter);
+            }
         }
 
         void OnGUI()
@@ -144,7 +162,7 @@ namespace Tangzx.ABSystem
             {
                 if (GUILayout.Button("Add", EditorStyles.toolbarButton))
                 {
-                    _config.filters.Add(new AssetBundleFilter());
+                    Add();
                 }
                 if (GUILayout.Button("Save", EditorStyles.toolbarButton))
                 {
