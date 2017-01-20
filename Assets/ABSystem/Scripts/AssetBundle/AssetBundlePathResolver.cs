@@ -68,8 +68,13 @@ namespace Tangzx.ABSystem
                 filePath = string.Format("jar:file://{0}!/assets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
             else
                 filePath = string.Format("{0}!assets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+#elif UNITY_IOS
+            if (forWWW)
+                filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+            else
+                filePath = string.Format("{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
 #else
-            filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+            throw new NotImplementedException();
 #endif
             return filePath;
         }
@@ -90,10 +95,10 @@ namespace Tangzx.ABSystem
             {
                 if (cacheDir == null)
                 {
-#if UNITY_ANDROID
-                    string dir = string.Format("{0}/AssetBundles", Application.persistentDataPath);
+#if UNITY_EDITOR
+                    string dir = string.Format("{0}/{1}", Application.streamingAssetsPath, BundleSaveDirName);
 #else
-                    string dir = string.Format("{0}/AssetBundles", Application.streamingAssetsPath);
+					string dir = string.Format("{0}/AssetBundles", Application.persistentDataPath);
 #endif
                     cacheDir = new DirectoryInfo(dir);
                     if (!cacheDir.Exists)
