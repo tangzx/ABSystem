@@ -74,7 +74,7 @@ namespace Tangzx.ABSystem
             else
                 filePath = string.Format("{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
 #else
-            throw new NotImplementedException();
+            throw new System.NotImplementedException();
 #endif
             return filePath;
         }
