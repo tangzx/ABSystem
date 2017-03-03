@@ -150,7 +150,8 @@ namespace Tangzx.ABSystem
             {
                 Object o = deps[i];
                 //不包含脚本对象
-                if (o is MonoScript)
+                //不包含LightingDataAsset对象
+                if (o is MonoScript || o is LightingDataAsset)
                     continue;
 
                 //不包含builtin对象
