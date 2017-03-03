@@ -45,8 +45,11 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < all.Count; i++)
             {
                 AssetTarget target = all[i];
-                Hash128 hash = manifest.GetAssetBundleHash(target.bundleName);
-                target.bundleCrc = hash.ToString();
+                if (target.needSelfExport)
+                {
+                    Hash128 hash = manifest.GetAssetBundleHash(target.bundleName);
+                    target.bundleCrc = hash.ToString();
+                }
             }
             this.SaveDepAll(all);
             ab.Unload(true);
