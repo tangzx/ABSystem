@@ -13,7 +13,7 @@ namespace Tangzx.ABSystem
         Builtin
     }
 
-    public class AssetTarget : System.IComparable<AssetTarget>
+    public class AssetTarget : IAssetBundleEntry, System.IComparable<AssetTarget>
     {
         /// <summary>
         /// 目标Object

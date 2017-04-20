@@ -1,11 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 namespace Tangzx.ABSystem
 {
-    public class ABBuilder
+    public enum BuildPhase
+    {
+        Analyze,
+        Merge,
+        BeforeExport
+    }
+
+    public class ABBuilder : IAssetBundleBuilder
     {
         protected AssetBundleDataWriter dataWriter = new AssetBundleDataBinaryWriter();
         protected AssetBundlePathResolver pathResolver;
@@ -48,16 +56,21 @@ namespace Tangzx.ABSystem
             {
                 target.Analyze();
             }
+            processModifiers(BuildPhase.Analyze);
+
             all = AssetBundleUtils.GetAll();
             foreach (AssetTarget target in all)
             {
                 target.Merge();
             }
+            processModifiers(BuildPhase.Merge);
+
             all = AssetBundleUtils.GetAll();
             foreach (AssetTarget target in all)
             {
                 target.BeforeExport();
             }
+            processModifiers(BuildPhase.BeforeExport);
         }
 
         public virtual void Export()
@@ -131,6 +144,16 @@ namespace Tangzx.ABSystem
                     File.Delete(fi.FullName + ".manifest");
                 }
             }
+        }
+
+        void processModifiers(BuildPhase phase)
+        {
+            throw new NotImplementedException();
+        }
+
+        IAssetBundleEntry IAssetBundleBuilder.createFakeEntry()
+        {
+            throw new NotImplementedException();
         }
     }
 }
