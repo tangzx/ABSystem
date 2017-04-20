@@ -317,5 +317,43 @@ namespace Tangzx.ABSystem
         {
             get; set;
         }
+
+        public virtual string[] GetAssetNames()
+        {
+            return new string[] { assetPath };
+        }
+    }
+
+    public class AssetBundlePack : AssetBundleEntry
+    {
+        List<AssetTarget> assets = new List<AssetTarget>();
+
+        public AssetBundlePack()
+        {
+            exportType = AssetBundleExportType.Standalone;
+        }
+
+        public void Add(AssetTarget at)
+        {
+            at.exportType = AssetBundleExportType.Asset;
+            assets.Add(at);
+
+            var children = at.GetChildren();
+            at.RemoveDependChildren();
+            foreach (var child in children)
+            {
+                child.AddDependParent(this);
+            }
+        }
+
+        public override string[] GetAssetNames()
+        {
+            List<string> s = new List<string>();
+            for (int i = 0; i < assets.Count; i++)
+            {
+                s.AddRange(assets[i].GetAssetNames());
+            }
+            return s.ToArray();
+        }
     }
 }

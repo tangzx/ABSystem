@@ -27,7 +27,7 @@ namespace Tangzx.ABSystem
                 {
                     AssetBundleBuild build = new AssetBundleBuild();
                     build.assetBundleName = target.bundleName;
-                    build.assetNames = new string[] { target.assetPath };
+                    build.assetNames = target.GetAssetNames();
                     list.Add(build);
                 }
             }
