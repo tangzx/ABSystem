@@ -78,7 +78,7 @@ namespace Tangzx.ABSystem
 
             all = GetAll();
             processModifiers(BuildPhase.Merge1);
-            foreach (AssetTarget target in all)
+            foreach (AssetBundleEntry target in all)
             {
                 target.Merge();
             }
@@ -86,7 +86,7 @@ namespace Tangzx.ABSystem
 
             all = GetAll();
             processModifiers(BuildPhase.BeforeExport1);
-            foreach (AssetTarget target in all)
+            foreach (AssetBundleEntry target in all)
             {
                 target.BeforeExport();
             }

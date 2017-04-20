@@ -161,21 +161,6 @@ namespace Tangzx.ABSystem
             }
         }
 
-        public void Merge()
-        {
-            if (this.NeedExportStandalone())
-            {
-                var children = GetChildren();
-                this.RemoveDependChildren();
-                foreach (var child in children)
-                {
-                    child.AddDependParent(this);
-                }
-            }
-        }
-
-        
-
         /// <summary>
         /// 判断是否依赖树变化了
         /// 如果现在的依赖和之前的依赖不一样了则改变了，需要重新打包
@@ -279,15 +264,6 @@ namespace Tangzx.ABSystem
 
                 return v;
             }
-        }
-
-        /// <summary>
-        /// (作为AssetType.Asset时)是否需要单独导出
-        /// </summary>
-        /// <returns></returns>
-        private bool NeedExportStandalone()
-        {
-            return childCount > 1;
         }
         
         /// <summary>

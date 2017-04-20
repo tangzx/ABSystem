@@ -227,6 +227,28 @@ namespace Tangzx.ABSystem
             }
         }
 
+        public virtual void Merge()
+        {
+            if (this.NeedExportStandalone())
+            {
+                var children = GetChildren();
+                this.RemoveDependChildren();
+                foreach (var child in children)
+                {
+                    child.AddDependParent(this);
+                }
+            }
+        }
+
+        /// <summary>
+        /// (作为AssetType.Asset时)是否需要单独导出
+        /// </summary>
+        /// <returns></returns>
+        private bool NeedExportStandalone()
+        {
+            return childCount > 1;
+        }
+
         /// <summary>
         /// 获取所有依赖项
         /// </summary>
