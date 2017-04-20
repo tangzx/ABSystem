@@ -1,7 +1,11 @@
-﻿namespace Tangzx.ABSystem
+﻿using System.Collections.Generic;
+
+namespace Tangzx.ABSystem
 {
     public interface IAssetBundleBuilder
     {
-        IAssetBundleEntry createFakeEntry();
+        AssetBundleEntry createFakeEntry();
+
+        List<AssetBundleEntry> GetAll();
     }
 }

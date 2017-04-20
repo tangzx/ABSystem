@@ -5,7 +5,7 @@ namespace Tangzx.ABSystem
 {
     public class AssetBundleDataBinaryWriter : AssetBundleDataWriter
     {
-        public override void Save(Stream stream, AssetTarget[] targets)
+        public override void Save(Stream stream, AssetBundleEntry[] targets)
         {
             BinaryWriter sw = new BinaryWriter(stream);
             //写入文件头判断文件类型用，ABDB 意思即 Asset-Bundle-Data-Binary
@@ -15,7 +15,7 @@ namespace Tangzx.ABSystem
 
             for (int i = 0; i < targets.Length; i++)
             {
-                AssetTarget target = targets[i];
+                AssetBundleEntry target = targets[i];
                 bundleNames.Add(target.bundleName);
             }
 
@@ -29,8 +29,8 @@ namespace Tangzx.ABSystem
             //写入详细信息
             for (int i = 0; i < targets.Length; i++)
             {
-                AssetTarget target = targets[i];
-                HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
+                AssetBundleEntry target = targets[i];
+                HashSet<AssetBundleEntry> deps = new HashSet<AssetBundleEntry>();
                 target.GetDependencies(deps);
 
                 //debug name
@@ -46,7 +46,7 @@ namespace Tangzx.ABSystem
                 //写入依赖信息
                 sw.Write(deps.Count);
 
-                foreach (AssetTarget item in deps)
+                foreach (AssetBundleEntry item in deps)
                 {
                     sw.Write(bundleNames.IndexOf(item.bundleName));
                 }

@@ -8,15 +8,20 @@ namespace Tangzx.ABSystem
 {
     public enum BuildPhase
     {
-        Analyze,
-        Merge,
-        BeforeExport
+        Analyze1,
+        Analyze2,
+        Merge1,
+        Merge2,
+        BeforeExport1,
+        BeforeExport2
     }
 
     public class ABBuilder : IAssetBundleBuilder
     {
         protected AssetBundleDataWriter dataWriter = new AssetBundleDataBinaryWriter();
         protected AssetBundlePathResolver pathResolver;
+
+        private List<AssetBundleEntry> createdEntries = new List<AssetBundleEntry>();
 
         public ABBuilder() : this(new AssetBundlePathResolver())
         {
@@ -49,28 +54,43 @@ namespace Tangzx.ABSystem
             EditorUtility.ClearProgressBar();
         }
 
+        public List<AssetBundleEntry> GetAll()
+        {
+            var list = new List<AssetBundleEntry>();
+            var targets = AssetBundleUtils.GetAll();
+            for (int i = 0; i < targets.Count; i++)
+            {
+                list.Add(targets[i]);
+            }
+            list.AddRange(createdEntries);
+            return list;
+        }
+
         public virtual void Analyze()
         {
-            var all = AssetBundleUtils.GetAll();
+            var all = GetAll();
+            processModifiers(BuildPhase.Analyze1);
             foreach (AssetTarget target in all)
             {
                 target.Analyze();
             }
-            processModifiers(BuildPhase.Analyze);
+            processModifiers(BuildPhase.Analyze2);
 
-            all = AssetBundleUtils.GetAll();
+            all = GetAll();
+            processModifiers(BuildPhase.Merge1);
             foreach (AssetTarget target in all)
             {
                 target.Merge();
             }
-            processModifiers(BuildPhase.Merge);
+            processModifiers(BuildPhase.Merge2);
 
-            all = AssetBundleUtils.GetAll();
+            all = GetAll();
+            processModifiers(BuildPhase.BeforeExport1);
             foreach (AssetTarget target in all)
             {
                 target.BeforeExport();
             }
-            processModifiers(BuildPhase.BeforeExport);
+            processModifiers(BuildPhase.BeforeExport2);
         }
 
         public virtual void Export()
@@ -93,17 +113,17 @@ namespace Tangzx.ABSystem
             }
         }
 
-        protected void SaveDepAll(List<AssetTarget> all)
+        protected void SaveDepAll(List<AssetBundleEntry> all)
         {
             string path = Path.Combine(pathResolver.BundleSavePath, pathResolver.DependFileName);
 
             if (File.Exists(path))
                 File.Delete(path);
 
-            List<AssetTarget> exportList = new List<AssetTarget>();
+            List<AssetBundleEntry> exportList = new List<AssetBundleEntry>();
             for (int i = 0; i < all.Count; i++)
             {
-                AssetTarget target = all[i];
+                AssetBundleEntry target = all[i];
                 if (target.needSelfExport)
                     exportList.Add(target);
             }
@@ -120,12 +140,12 @@ namespace Tangzx.ABSystem
         /// 删除未使用的AB，可能是上次打包出来的，而这一次没生成的
         /// </summary>
         /// <param name="all"></param>
-        protected void RemoveUnused(List<AssetTarget> all)
+        protected void RemoveUnused(List<AssetBundleEntry> all)
         {
             HashSet<string> usedSet = new HashSet<string>();
             for (int i = 0; i < all.Count; i++)
             {
-                AssetTarget target = all[i];
+                AssetBundleEntry target = all[i];
                 if (target.needSelfExport)
                     usedSet.Add(target.bundleName);
             }
@@ -148,12 +168,24 @@ namespace Tangzx.ABSystem
 
         void processModifiers(BuildPhase phase)
         {
-            throw new NotImplementedException();
+            Type et = typeof(ABBuilder);
+            Type[] list = et.Assembly.GetTypes();
+            for (int i = 0; i < list.Length; i++)
+            {
+                Type t = list[i];
+                if (!t.IsAbstract && typeof(IAssetBundleEntryModifier).IsAssignableFrom(t))
+                {
+                    IAssetBundleEntryModifier n = (IAssetBundleEntryModifier)Activator.CreateInstance(t);
+                    n.process(this, phase);
+                }
+            }
         }
 
-        IAssetBundleEntry IAssetBundleBuilder.createFakeEntry()
+        AssetBundleEntry IAssetBundleBuilder.createFakeEntry()
         {
-            throw new NotImplementedException();
+            AssetBundleEntry abe = new AssetBundleEntry();
+            createdEntries.Add(abe);
+            return abe;
         }
     }
 }

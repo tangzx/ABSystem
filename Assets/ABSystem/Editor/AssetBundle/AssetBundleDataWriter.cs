@@ -5,13 +5,13 @@ namespace Tangzx.ABSystem
 {
     public class AssetBundleDataWriter
     {
-        public void Save(string path, AssetTarget[] targets)
+        public void Save(string path, AssetBundleEntry[] targets)
         {
             FileStream fs = new FileStream(path, FileMode.CreateNew);
             Save(fs, targets);
         }
 
-        public virtual void Save(Stream stream, AssetTarget[] targets)
+        public virtual void Save(Stream stream, AssetBundleEntry[] targets)
         {
             StreamWriter sw = new StreamWriter(stream);
             //写入文件头判断文件类型用，ABDT 意思即 Asset-Bundle-Data-Text
@@ -19,8 +19,8 @@ namespace Tangzx.ABSystem
 
             for (int i = 0; i < targets.Length; i++)
             {
-                AssetTarget target = targets[i];
-                HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
+                AssetBundleEntry target = targets[i];
+                HashSet<AssetBundleEntry> deps = new HashSet<AssetBundleEntry>();
                 target.GetDependencies(deps);
 
                 //debug name
@@ -36,7 +36,7 @@ namespace Tangzx.ABSystem
                 //写入依赖信息
                 sw.WriteLine(deps.Count);
 
-                foreach (AssetTarget item in deps)
+                foreach (AssetBundleEntry item in deps)
                 {
                     sw.WriteLine(item.bundleName);
                 }

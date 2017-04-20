@@ -19,10 +19,10 @@ namespace Tangzx.ABSystem
 
             List<AssetBundleBuild> list = new List<AssetBundleBuild>();
             //标记所有 asset bundle name
-            var all = AssetBundleUtils.GetAll();
+            var all = GetAll();
             for (int i = 0; i < all.Count; i++)
             {
-                AssetTarget target = all[i];
+                AssetBundleEntry target = all[i];
                 if (target.needSelfExport)
                 {
                     AssetBundleBuild build = new AssetBundleBuild();
@@ -44,7 +44,7 @@ namespace Tangzx.ABSystem
             //hash
             for (int i = 0; i < all.Count; i++)
             {
-                AssetTarget target = all[i];
+                AssetBundleEntry target = all[i];
                 if (target.needSelfExport)
                 {
                     Hash128 hash = manifest.GetAssetBundleHash(target.bundleName);
