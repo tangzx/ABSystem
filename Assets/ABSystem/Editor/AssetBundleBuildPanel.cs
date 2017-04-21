@@ -83,7 +83,9 @@ namespace Tangzx.ABSystem
             r.width = 50;
             if (GUI.Button(r, "Select"))
             {
-                filter.path = SelectFolder();
+                var path = SelectFolder();
+                if (path != null)
+                    filter.path = path;
             }
 
             r.xMin = r.xMax + GAP;
