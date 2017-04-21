@@ -181,9 +181,9 @@ namespace Tangzx.ABSystem
             }
         }
 
-        AssetBundlePack IAssetBundleBuilder.createFakeEntry()
+        AssetBundlePack IAssetBundleBuilder.createFakeEntry(string assetPath)
         {
-            AssetBundlePack abe = new AssetBundlePack();
+            AssetBundlePack abe = new AssetBundlePack(assetPath);
             createdEntries.Add(abe);
             return abe;
         }

@@ -4,7 +4,7 @@ namespace Tangzx.ABSystem
 {
     public interface IAssetBundleBuilder
     {
-        AssetBundlePack createFakeEntry();
+        AssetBundlePack createFakeEntry(string assetPath);
 
         List<AssetBundleEntry> GetAll();
     }

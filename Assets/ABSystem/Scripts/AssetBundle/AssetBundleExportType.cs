@@ -1,5 +1,8 @@
-﻿namespace Tangzx.ABSystem
+﻿using System;
+
+namespace Tangzx.ABSystem
 {
+    [Flags]
     public enum AssetBundleExportType
     {
         /// <summary>

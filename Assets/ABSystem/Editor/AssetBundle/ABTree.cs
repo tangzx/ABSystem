@@ -9,11 +9,11 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 我要依赖的项
         /// </summary>
-        private HashSet<DependencyTreeNode<T>> _dependParentSet = new HashSet<DependencyTreeNode<T>>();
+        private readonly HashSet<DependencyTreeNode<T>> _dependParentSet = new HashSet<DependencyTreeNode<T>>();
         /// <summary>
         /// 依赖我的项
         /// </summary>
-        private HashSet<DependencyTreeNode<T>> _dependChildrenSet = new HashSet<DependencyTreeNode<T>>();
+        private readonly HashSet<DependencyTreeNode<T>> _dependChildrenSet = new HashSet<DependencyTreeNode<T>>();
 
         /// <summary>
         /// 增加依赖项
@@ -21,12 +21,12 @@ namespace Tangzx.ABSystem
         /// <param name="target"></param>
         public void AddDependParent(DependencyTreeNode<T> target)
         {
-            if (target == this || this.ContainsDepend(target))
+            if (target == this || ContainsDepend(target))
                 return;
 
             _dependParentSet.Add(target);
             target.AddDependChild(this);
-            this.ClearParentDepend(target);
+            ClearParentDepend(target);
         }
 
         /// <summary>
@@ -41,12 +41,14 @@ namespace Tangzx.ABSystem
                 return true;
             if (recursive)
             {
-                var e = _dependParentSet.GetEnumerator();
-                while (e.MoveNext())
+                using (var e = _dependParentSet.GetEnumerator())
                 {
-                    if (e.Current.ContainsDepend(target, true))
+                    while (e.MoveNext())
                     {
-                        return true;
+                        if (e.Current.ContainsDepend(target, true))
+                        {
+                            return true;
+                        }
                     }
                 }
             }
@@ -64,14 +66,16 @@ namespace Tangzx.ABSystem
         public void ClearParentDepend(DependencyTreeNode<T> target = null)
         {
             IEnumerable<DependencyTreeNode<T>> cols = _dependParentSet;
-            if (target != null) cols = new DependencyTreeNode<T>[] { target };
+            if (target != null) cols = new[] { target };
             foreach (DependencyTreeNode<T> at in cols)
             {
-                var e = _dependChildrenSet.GetEnumerator();
-                while (e.MoveNext())
+                using (var e = _dependChildrenSet.GetEnumerator())
                 {
-                    DependencyTreeNode<T> dc = e.Current;
-                    dc.RemoveDependParent(at);
+                    while (e.MoveNext())
+                    {
+                        DependencyTreeNode<T> dc = e.Current;
+                        dc.RemoveDependParent(at);
+                    }
                 }
             }
         }
@@ -88,11 +92,13 @@ namespace Tangzx.ABSystem
 
             //recursive
             var dcc = new HashSet<DependencyTreeNode<T>>(_dependChildrenSet);
-            var e = dcc.GetEnumerator();
-            while (e.MoveNext())
+            using (var e = dcc.GetEnumerator())
             {
-                DependencyTreeNode<T> dc = e.Current;
-                dc.RemoveDependParent(target);
+                while (e.MoveNext())
+                {
+                    DependencyTreeNode<T> dc = e.Current;
+                    dc.RemoveDependParent(target);
+                }
             }
         }
 
@@ -133,13 +139,15 @@ namespace Tangzx.ABSystem
         public DependencyTreeNode<T>[] GetChildren()
         {
             DependencyTreeNode<T>[] children = new DependencyTreeNode<T>[_dependChildrenSet.Count];
-            var e = _dependChildrenSet.GetEnumerator();
-            int idx = 0;
-            while (e.MoveNext())
+            using (var e = _dependChildrenSet.GetEnumerator())
             {
-                children[idx++] = e.Current;
+                int idx = 0;
+                while (e.MoveNext())
+                {
+                    children[idx++] = e.Current;
+                }
+                return children;
             }
-            return children;
         }
 
         public int childCount
@@ -187,7 +195,7 @@ namespace Tangzx.ABSystem
 
         private void GetRoot(HashSet<AssetBundleEntry> rootSet)
         {
-            switch (this.exportType)
+            switch (exportType)
             {
                 case AssetBundleExportType.Standalone:
                 case AssetBundleExportType.Root:
@@ -221,18 +229,18 @@ namespace Tangzx.ABSystem
             if (exportType == AssetBundleExportType.Asset)
             {
                 HashSet<AssetBundleEntry> rootSet = new HashSet<AssetBundleEntry>();
-                this.GetRoot(rootSet);
+                GetRoot(rootSet);
                 if (rootSet.Count > 1)
-                    this.exportType = AssetBundleExportType.Standalone;
+                    exportType = AssetBundleExportType.Standalone;
             }
         }
 
         public virtual void Merge()
         {
-            if (this.NeedExportStandalone())
+            if (NeedExportStandalone())
             {
                 var children = GetChildren();
-                this.RemoveDependChildren();
+                RemoveDependChildren();
                 foreach (var child in children)
                 {
                     child.AddDependParent(this);
@@ -320,16 +328,18 @@ namespace Tangzx.ABSystem
 
         public virtual string[] GetAssetNames()
         {
-            return new string[] { assetPath };
+            return new[] { assetPath };
         }
     }
 
     public class AssetBundlePack : AssetBundleEntry
     {
-        List<AssetTarget> assets = new List<AssetTarget>();
-
-        public AssetBundlePack()
+        readonly List<AssetTarget> assets = new List<AssetTarget>();
+        
+        public AssetBundlePack(string assetPath)
         {
+            this.assetPath = assetPath;
+            bundleName = HashUtil.Get(assetPath) + ".ab";
             exportType = AssetBundleExportType.Standalone;
         }
 
