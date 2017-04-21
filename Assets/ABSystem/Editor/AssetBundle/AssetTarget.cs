@@ -42,11 +42,11 @@ namespace Tangzx.ABSystem
 
         public AssetTarget(Object o, FileInfo file, string assetPath)
         {
-            this.asset = o;
+            asset = o;
             this.file = file;
             this.assetPath = assetPath;
-            this.bundleShortName = file.Name.ToLower();
-            this.bundleName = HashUtil.Get(AssetBundleUtils.ConvertToABName(assetPath)) + ".ab";
+            bundleShortName = file.Name.ToLower();
+            bundleName = HashUtil.Get(AssetBundleUtils.ConvertToABName(assetPath)) + ".ab";
 
             _isFileChanged = true;
             _metaHash = "0";
@@ -155,7 +155,7 @@ namespace Tangzx.ABSystem
                 if (target == null)
                     continue;
 
-                this.AddDependParent(target);
+                AddDependParent(target);
 
                 target.Analyze();
             }
@@ -196,7 +196,7 @@ namespace Tangzx.ABSystem
             this.level = level;
             if (level == -1 && levelList != null)
                 levelList.Remove(this);
-            this.levelList = lvList;
+            levelList = lvList;
         }
 
         //public List<AssetTarget> dependencies
@@ -331,14 +331,14 @@ namespace Tangzx.ABSystem
 
         public void WriteCache(StreamWriter sw)
         {
-            sw.WriteLine(this.assetPath);
+            sw.WriteLine(assetPath);
             sw.WriteLine(GetHash());
             sw.WriteLine(_metaHash);
-            sw.WriteLine(this._bundleCrc);
+            sw.WriteLine(_bundleCrc);
             HashSet<AssetBundleEntry> deps = new HashSet<AssetBundleEntry>();
-            this.GetDependencies(deps);
+            GetDependencies(deps);
             sw.WriteLine(deps.Count.ToString());
-            foreach (AssetTarget at in deps)
+            foreach (AssetBundleEntry at in deps)
             {
                 sw.WriteLine(at.assetPath);
             }
