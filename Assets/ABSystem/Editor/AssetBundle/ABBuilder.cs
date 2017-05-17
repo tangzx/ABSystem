@@ -74,6 +74,8 @@ namespace Tangzx.ABSystem
                 FileInfo[] prefabs = bundleDir.GetFiles(partterns[i], searchOption);
                 foreach (FileInfo file in prefabs)
                 {
+                    if (file.Extension.Contains("meta"))
+                        continue;
                     AssetTarget target = AssetBundleUtils.Load(file);
                     target.exportType = AssetBundleExportType.Root;
                 }
