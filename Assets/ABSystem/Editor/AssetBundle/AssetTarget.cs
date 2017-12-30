@@ -144,7 +144,7 @@ namespace Tangzx.ABSystem
             }
 
             Object[] deps = EditorUtility.CollectDependencies(new Object[] { asset });
-#if UNITY_5
+#if UNITY_5 || UNITY_2017_1_OR_NEWER
             List<Object> depList = new List<Object>();
             for (int i = 0; i < deps.Length; i++)
             {
