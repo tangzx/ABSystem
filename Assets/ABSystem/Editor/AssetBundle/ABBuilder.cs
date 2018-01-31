@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -128,7 +127,11 @@ namespace Tangzx.ABSystem
                     exportList.Add(target);
             }
             AssetBundleDataWriter writer = dataWriter;
-            writer.Save(path, exportList.ToArray());
+            var bundleEntries = exportList.ToArray();
+            writer.Save(path, bundleEntries);
+
+            //后处理
+            PluginHelper.ProcessPlugin<IDepProcessor>(p => p.PostProcess(bundleEntries));
         }
 
         public void SetDataWriter(AssetBundleDataWriter w)
@@ -168,17 +171,10 @@ namespace Tangzx.ABSystem
 
         void processModifiers(BuildPhase phase)
         {
-            Type et = typeof(ABBuilder);
-            Type[] list = et.Assembly.GetTypes();
-            for (int i = 0; i < list.Length; i++)
+            PluginHelper.ProcessPlugin<IAssetBundleEntryModifier>(n =>
             {
-                Type t = list[i];
-                if (!t.IsAbstract && typeof(IAssetBundleEntryModifier).IsAssignableFrom(t))
-                {
-                    IAssetBundleEntryModifier n = (IAssetBundleEntryModifier)Activator.CreateInstance(t);
-                    n.process(this, phase);
-                }
-            }
+                n.process(this, phase);
+            });
         }
 
         AssetBundlePack IAssetBundleBuilder.createFakeEntry(string assetPath)
