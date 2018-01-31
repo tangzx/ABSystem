@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Tangzx.ABSystem
 {
-    public interface IABManager
+    public interface IAssetBundleManager
     {
         AssetBundlePathResolver pathResolver { get; set; }
         void Init(Action callback);

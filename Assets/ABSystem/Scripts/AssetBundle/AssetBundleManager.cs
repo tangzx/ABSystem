@@ -19,10 +19,10 @@ namespace Tangzx.ABSystem
         State_Complete = 3
     }
 
-    public class AssetBundleManager : MonoBehaviour, IABManager
+    public class AssetBundleManager : MonoBehaviour, IAssetBundleManager
     {
         public static Version version = new Version(0, 1, 0);
-        public static IABManager Instance;
+        public static IAssetBundleManager Instance;
         public static string NAME = "AssetBundleManager";
         public static bool enableLog = true;
 
