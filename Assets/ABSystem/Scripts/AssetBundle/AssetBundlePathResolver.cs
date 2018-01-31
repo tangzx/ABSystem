@@ -73,6 +73,11 @@ namespace Tangzx.ABSystem
                 filePath = string.Format("file://{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
             else
                 filePath = string.Format("{0}/Raw/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+#elif UNITY_STANDALONE
+            if (forWWW)
+                filePath = string.Format("file://{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
+            else
+                filePath = string.Format("{0}/StreamingAssets/{1}/{2}", Application.dataPath, BundleSaveDirName, path);
 #else
             throw new System.NotImplementedException();
 #endif
@@ -97,6 +102,8 @@ namespace Tangzx.ABSystem
                 {
 #if UNITY_EDITOR
                     string dir = string.Format("{0}/{1}", Application.streamingAssetsPath, BundleSaveDirName);
+#elif UNITY_STANDALONE
+                    string dir = string.Format("{0}/ABSystem", Application.dataPath);
 #else
 					string dir = string.Format("{0}/AssetBundles", Application.persistentDataPath);
 #endif
