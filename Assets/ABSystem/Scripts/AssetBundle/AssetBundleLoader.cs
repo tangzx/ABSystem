@@ -10,7 +10,7 @@ namespace Tangzx.ABSystem
     /// </summary>
     public abstract class AssetBundleLoader : IComparable<AssetBundleLoader>
     {
-        static int idCounter = 0;
+        static int idCounter;
 
         public AssetBundleManager.LoadAssetCompleteHandler onComplete;
         public string bundleName;
@@ -124,7 +124,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 开始加载
         /// </summary>
-        override public void Start()
+        public override void Start()
         {
             if (_hasError)
                 state = LoadState.State_Error;
@@ -179,7 +179,7 @@ namespace Tangzx.ABSystem
         /// 注意：这个方法只能被 AssetBundleManager 调用
         /// 由 Manager 统一分配加载时机，防止加载过卡
         /// </summary>
-        override public void LoadBundle()
+        public override void LoadBundle()
         {
             _assetBundleCachedFile = string.Format("{0}/{1}", bundleManager.pathResolver.BundleCacheDir, bundleName);
             _assetBundleSourceFile = bundleManager.pathResolver.GetBundleSourceFile(bundleName);
@@ -227,8 +227,7 @@ namespace Tangzx.ABSystem
                 //加载完缓存一份，便于下次快速加载
                 if (www.error == null)
                 {
-                    File.WriteAllBytes(_assetBundleCachedFile, www.bytes);
-
+                    bundleManager.cacheManager.Cache(_assetBundleCachedFile, www.bytes);
                     _bundle = www.assetBundle;
 
                     Complete();
@@ -260,7 +259,7 @@ namespace Tangzx.ABSystem
             }
         }
 
-        override protected void Complete()
+        protected override void Complete()
         {
             if (bundleInfo == null)
             {
@@ -286,7 +285,7 @@ namespace Tangzx.ABSystem
             this.prority = 0;
         }
 
-        override protected void Error()
+        protected override void Error()
         {
             _hasError = true;
             this.state = LoadState.State_Error;
