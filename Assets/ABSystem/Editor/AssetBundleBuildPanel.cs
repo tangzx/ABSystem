@@ -21,7 +21,7 @@ namespace Tangzx.ABSystem
             if (config == null)
                 return;
 
-#if UNITY_5
+#if UNITY_5 || UNITY_2017_1_OR_NEWER
 			ABBuilder builder = new AssetBundleBuilder5x(new AssetBundlePathResolver());
 #else
 			ABBuilder builder = new AssetBundleBuilder4x(new AssetBundlePathResolver());
@@ -43,10 +43,10 @@ namespace Tangzx.ABSystem
 
 		static T LoadAssetAtPath<T>(string path) where T:Object
 		{
-#if UNITY_5
-			return AssetDatabase.LoadAssetAtPath<T>(savePath);
+#if UNITY_5 || UNITY_2017_1_OR_NEWER
+			return AssetDatabase.LoadAssetAtPath<T>(path);
 #else
-			return (T)AssetDatabase.LoadAssetAtPath(savePath, typeof(T));
+			return (T)AssetDatabase.LoadAssetAtPath(path, typeof(T));
 #endif
 		}
 
@@ -121,10 +121,10 @@ namespace Tangzx.ABSystem
             _config = LoadAssetAtPath<AssetBundleBuildConfig>(savePath);
             if (_config == null)
             {
-                _config = new AssetBundleBuildConfig();
+                _config = CreateInstance<AssetBundleBuildConfig>();
             }
         }
-
+        
         void InitFilterListDrawer()
         {
             _list = new ReorderableList(_config.filters, typeof(AssetBundleFilter));

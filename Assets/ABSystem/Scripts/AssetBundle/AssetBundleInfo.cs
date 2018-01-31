@@ -36,7 +36,6 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 强制的引用计数
         /// </summary>
-        [SerializeField]
         public int refCount { get; private set; }
 
         private HashSet<AssetBundleInfo> deps = HashSetPool<AssetBundleInfo>.Get();
@@ -268,7 +267,7 @@ namespace Tangzx.ABSystem
             {
                 if (_mainObject == null && _isReady)
                 {
-#if UNITY_5
+#if UNITY_5 || UNITY_2017_1_OR_NEWER
                     string[] names = bundle.GetAllAssetNames();
                     _mainObject = bundle.LoadAsset(names[0]);
 #else
