@@ -40,9 +40,9 @@ namespace Tangzx.ABSystem
                 //File Name
                 sw.Write(target.bundleShortName);
                 //hash
-                sw.Write(target.bundleCrc);
+                sw.Write(target.BundleCrc);
                 //type
-                sw.Write((int)target.compositeType);
+                sw.Write((int)target.CompositeType);
                 //写入依赖信息
                 sw.Write(deps.Count);
 

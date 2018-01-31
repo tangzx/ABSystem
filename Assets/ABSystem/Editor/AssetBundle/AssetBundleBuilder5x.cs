@@ -23,7 +23,7 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < all.Count; i++)
             {
                 AssetBundleEntry target = all[i];
-                if (target.needSelfExport)
+                if (target.ShouldSelfExport)
                 {
                     AssetBundleBuild build = new AssetBundleBuild();
                     build.assetBundleName = target.bundleName;
@@ -45,10 +45,10 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < all.Count; i++)
             {
                 AssetBundleEntry target = all[i];
-                if (target.needSelfExport)
+                if (target.ShouldSelfExport)
                 {
                     Hash128 hash = manifest.GetAssetBundleHash(target.bundleName);
-                    target.bundleCrc = hash.ToString();
+                    target.BundleCrc = hash.ToString();
                 }
             }
             this.SaveDepAll(all);

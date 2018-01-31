@@ -26,11 +26,9 @@ namespace Tangzx.ABSystem
         public List<AssetTarget> levelList;
 
         //目标文件是否已改变
-        private bool _isFileChanged = false;
+        private bool _isFileChanged;
         //是否已分析过依赖
-        private bool _isAnalyzed = false;
-        //依赖树是否改变（用于增量打包）
-        private bool _isDepTreeChanged = false;
+        private bool _isAnalyzed;
         //上次打包的信息（用于增量打包）
         private AssetCacheInfo _cacheInfo;
         //.meta 文件的Hash
@@ -63,22 +61,18 @@ namespace Tangzx.ABSystem
         /// </summary>
         void LoadMetaHashIfNecessary()
         {
-            bool needLoad = false;
-            if (typeof(Texture).IsInstanceOfType(asset) ||
-                typeof(AudioClip).IsInstanceOfType(asset) ||
-                typeof(Mesh).IsInstanceOfType(asset) ||
-                typeof(Shader).IsInstanceOfType(asset) )
-            {
-                needLoad = true;
-            }
+            bool shouldLoad = asset is Texture ||
+                asset is AudioClip ||
+                asset is Mesh ||
+                asset is Shader;
 
-            if (!needLoad)
+            if (!shouldLoad)
             {
                 AssetImporter importer = AssetImporter.GetAtPath(assetPath);
-                needLoad = typeof(ModelImporter).IsInstanceOfType(importer);
+                shouldLoad = importer is ModelImporter;
             }
 
-            if (needLoad)
+            if (shouldLoad)
             {
                 _metaHash = AssetBundleUtils.GetFileHash(assetPath + ".meta");
             }
@@ -161,36 +155,6 @@ namespace Tangzx.ABSystem
             }
         }
 
-        /// <summary>
-        /// 判断是否依赖树变化了
-        /// 如果现在的依赖和之前的依赖不一样了则改变了，需要重新打包
-        /// </summary>
-        //public void AnalyzeIfDepTreeChanged()
-        //{
-        //    _isDepTreeChanged = false;
-        //    if (_cacheInfo != null)
-        //    {
-        //        HashSet<AssetTarget> deps = new HashSet<AssetTarget>();
-        //        GetDependencies(deps);
-
-        //        if (deps.Count != _cacheInfo.depNames.Length)
-        //        {
-        //            _isDepTreeChanged = true;
-        //        }
-        //        else
-        //        {
-        //            foreach (AssetTarget dep in deps)
-        //            {
-        //                if (!ArrayUtility.Contains<string>(_cacheInfo.depNames, dep.assetPath))
-        //                {
-        //                    _isDepTreeChanged = true;
-        //                    break;
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
         public void UpdateLevel(int level, List<AssetTarget> lvList)
         {
             this.level = level;
@@ -198,19 +162,13 @@ namespace Tangzx.ABSystem
                 levelList.Remove(this);
             levelList = lvList;
         }
-
-        //public List<AssetTarget> dependencies
-        //{
-        //    get { return new List<AssetTarget>(_dependParentSet); }
-        //}
-
-
-        public bool isNewBuild
+        
+        public bool IsNewBuild
         {
             get { return _isNewBuild; }
         }
 
-        public override string bundleCrc
+        public override string BundleCrc
         {
             get { return _bundleCrc; }
             set
@@ -223,56 +181,6 @@ namespace Tangzx.ABSystem
                 _bundleCrc = value;
             }
         }
-
-        /// <summary>
-        /// 是不是需要重编
-        /// </summary>
-        public override bool needRebuild
-        {
-            get
-            {
-                if (_isFileChanged || _isDepTreeChanged)
-                    return true;
-                return base.needRebuild;
-            }
-        }
-
-        /// <summary>
-        /// 是不是自己的原因需要重编的，有的可能是因为被依赖项的原因需要重编
-        /// </summary>
-        public bool needSelfRebuild
-        {
-            get
-            {
-                if (_isFileChanged || _isDepTreeChanged)
-                    return true;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 是否需要导出
-        /// </summary>
-        public bool needExport
-        {
-            get
-            {
-                if (isExported)
-                    return false;
-
-                bool v = needSelfExport && needRebuild;
-
-                return v;
-            }
-        }
-        
-        /// <summary>
-        /// 依赖我的项
-        /// </summary>
-        //public List<AssetTarget> dependsChildren
-        //{
-        //    get { return new List<AssetTarget>(_dependChildrenSet); }
-        //}
 
         int System.IComparable<AssetTarget>.CompareTo(AssetTarget other)
         {

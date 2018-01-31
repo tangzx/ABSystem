@@ -123,7 +123,7 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < all.Count; i++)
             {
                 AssetBundleEntry target = all[i];
-                if (target.needSelfExport)
+                if (target.ShouldSelfExport)
                     exportList.Add(target);
             }
             AssetBundleDataWriter writer = dataWriter;
@@ -149,7 +149,7 @@ namespace Tangzx.ABSystem
             for (int i = 0; i < all.Count; i++)
             {
                 AssetBundleEntry target = all[i];
-                if (target.needSelfExport)
+                if (target.ShouldSelfExport)
                     usedSet.Add(target.bundleName);
             }
 

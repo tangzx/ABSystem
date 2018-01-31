@@ -164,7 +164,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 保存地址
         /// </summary>
-        public string bundleSavePath
+        public string BundleSavePath
         {
             get
             {
@@ -237,7 +237,7 @@ namespace Tangzx.ABSystem
 
         public virtual void Merge()
         {
-            if (NeedExportStandalone())
+            if (ShouldExportStandalone())
             {
                 var children = GetChildren();
                 RemoveDependChildren();
@@ -252,7 +252,7 @@ namespace Tangzx.ABSystem
         /// (作为AssetType.Asset时)是否需要单独导出
         /// </summary>
         /// <returns></returns>
-        private bool NeedExportStandalone()
+        private bool ShouldExportStandalone()
         {
             return childCount > 1;
         }
@@ -265,7 +265,7 @@ namespace Tangzx.ABSystem
         {
             EachParentNode((node, entry) =>
             {
-                if (entry.needSelfExport)
+                if (entry.ShouldSelfExport)
                 {
                     list.Add(entry);
                 }
@@ -280,7 +280,7 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 是不是自身的原因需要导出如指定的类型prefab等，有些情况下是因为依赖树原因需要单独导出
         /// </summary>
-        public bool needSelfExport
+        public bool ShouldSelfExport
         {
             get
             {
@@ -292,14 +292,14 @@ namespace Tangzx.ABSystem
         /// <summary>
         /// 是不是需要重编
         /// </summary>
-        public virtual bool needRebuild
+        public virtual bool ShouldRebuild
         {
             get
             {
                 bool rebuild = false;
                 EachChildNode((node, entry) =>
                 {
-                    if (entry.needRebuild)
+                    if (entry.ShouldRebuild)
                     {
                         rebuild = true;
                         return false;
@@ -310,7 +310,7 @@ namespace Tangzx.ABSystem
             }
         }
 
-        public AssetBundleExportType compositeType
+        public AssetBundleExportType CompositeType
         {
             get
             {
@@ -321,7 +321,7 @@ namespace Tangzx.ABSystem
             }
         }
 
-        public virtual string bundleCrc
+        public virtual string BundleCrc
         {
             get; set;
         }
