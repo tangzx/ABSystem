@@ -171,6 +171,7 @@ namespace Tangzx.ABSystem
                 {
                     Debug.LogError(string.Format("{0} not exist!", depFile));
                 }
+		w.Dispose()
             }
             this.InitComplete();
         }
